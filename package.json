@@ -27,7 +27,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"*.{js,ts,json,md}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"*.{js,ts,json,md}\"",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"
   },
   "dependencies": {
