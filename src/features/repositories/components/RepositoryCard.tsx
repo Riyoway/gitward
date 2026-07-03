@@ -1,16 +1,26 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button, Card, CardBody, Chip, Select, SelectItem, Spinner, Tooltip } from '@heroui/react';
-import { GitBranch, RefreshCw, Trash2, User } from 'lucide-react';
+import { ArrowRightLeft, GitBranch, RefreshCw, Trash2, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { queryKeys } from '@/lib/queryKeys';
 import { firstSelectedKey } from '@/lib/selection';
 import { gitService } from '@/services/git.service';
 import { githubCliService } from '@/services/githubCli.service';
+import { syncService } from '@/services/sync.service';
 import { useGitAccountsStore } from '@/features/git-accounts/store';
+import type { SyncReport } from '@/types';
 import { useRepositoriesStore } from '../store';
 import { identityMatches } from '../sync-status';
 import type { Repository } from '../types';
+
+/** First failing step's detail, for inline error display. */
+function failureMessage(report: SyncReport): string {
+  const failed = report.steps.find((s) => !s.success);
+  if (!failed) return '';
+  const detail = failed.stderr.trim() || failed.stdout.trim();
+  return detail ? `${failed.name}: ${detail}` : failed.name;
+}
 
 interface RepositoryCardProps {
   repo: Repository;
@@ -43,6 +53,23 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
   };
 
   const assignedAccount = accounts.find((a) => a.id === repo.gitAccountId);
+
+  const sync = useMutation({
+    mutationFn: () => {
+      if (!assignedAccount) throw new Error('No git account assigned');
+      return syncService.syncRepository(
+        repo.path,
+        assignedAccount.userName,
+        assignedAccount.email,
+        repo.ghUsername,
+      );
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.repoIdentity(repo.id) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.repoStatus(repo.id) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.ghAccounts });
+    },
+  });
   const syncState =
     assignedAccount && identity.data
       ? identityMatches(identity.data, assignedAccount)
@@ -186,6 +213,23 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
               <SelectItem key={account.username}>{account.username}</SelectItem>
             ))}
           </Select>
+        </div>
+
+        <div className="flex items-center justify-between gap-3">
+          <p className="min-h-4 flex-1 text-xs text-danger">
+            {sync.isError && (sync.error as Error).message}
+            {sync.data && !sync.data.overallSuccess && failureMessage(sync.data)}
+          </p>
+          <Button
+            size="sm"
+            color="primary"
+            startContent={<ArrowRightLeft size={14} />}
+            isDisabled={!assignedAccount}
+            isLoading={sync.isPending}
+            onPress={() => sync.mutate()}
+          >
+            {t('repository.sync')}
+          </Button>
         </div>
       </CardBody>
     </Card>

@@ -50,7 +50,8 @@
     "githubAccount": "GitHub",
     "unassigned": "Unassigned",
     "needsSync": "Needs sync",
-    "inSync": "In sync"
+    "inSync": "In sync",
+    "sync": "Sync"
   },
   "githubCli": {
     "setupGit": "Sync git credentials",

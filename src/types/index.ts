@@ -31,3 +31,18 @@ export interface GhAccount {
   protocol: string | null;
   scopes: string[];
 }
+
+/** One step of a sync operation. */
+export interface SyncStep {
+  name: string;
+  success: boolean;
+  stdout: string;
+  stderr: string;
+  exitCode: number | null;
+}
+
+/** The result of syncing a repository's identity. */
+export interface SyncReport {
+  steps: SyncStep[];
+  overallSuccess: boolean;
+}

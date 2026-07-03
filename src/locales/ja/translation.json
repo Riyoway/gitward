@@ -50,7 +50,8 @@
     "githubAccount": "GitHub",
     "unassigned": "未割り当て",
     "needsSync": "要同期",
-    "inSync": "同期済み"
+    "inSync": "同期済み",
+    "sync": "同期"
   },
   "githubCli": {
     "setupGit": "git 認証情報を同期",
