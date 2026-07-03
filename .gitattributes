@@ -1,0 +1,15 @@
+# Normalize line endings to LF in the repo; check out LF on all platforms.
+* text=auto eol=lf
+
+# Binary assets — never normalize.
+*.png binary
+*.ico binary
+*.icns binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+
+# Generated lockfiles are text but noisy in diffs.
+package-lock.json linguist-generated=true
+src-tauri/Cargo.lock linguist-generated=true

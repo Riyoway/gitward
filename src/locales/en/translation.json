@@ -1,0 +1,23 @@
+{
+  "app": {
+    "name": "Gitward",
+    "tagline": "Keep the right identity on every repository."
+  },
+  "nav": {
+    "projects": "Projects",
+    "gitAccounts": "Git Accounts",
+    "githubCli": "GitHub CLI",
+    "logs": "Logs",
+    "settings": "Settings"
+  },
+  "common": {
+    "add": "Add",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "refresh": "Refresh",
+    "search": "Search",
+    "loading": "Loading…",
+    "empty": "Nothing here yet."
+  }
+}
