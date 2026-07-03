@@ -22,3 +22,12 @@ export interface GitStatus {
   isDirty: boolean;
   remoteUrl: string | null;
 }
+
+/** An account known to the GitHub CLI (`gh`). */
+export interface GhAccount {
+  username: string;
+  host: string;
+  active: boolean;
+  protocol: string | null;
+  scopes: string[];
+}

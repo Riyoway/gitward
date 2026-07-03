@@ -47,6 +47,14 @@
     "clean": "Clean",
     "identityUnset": "No local identity set"
   },
+  "githubCli": {
+    "setupGit": "Sync git credentials",
+    "setupGitDone": "git is now using gh for authentication.",
+    "active": "Active",
+    "setActive": "Set active",
+    "emptyHint": "No GitHub CLI accounts found. Run `gh auth login` in a terminal.",
+    "unavailable": "Could not run gh. Is the GitHub CLI installed?"
+  },
   "settings": {
     "appearance": "Appearance",
     "theme": "Theme",

@@ -47,6 +47,14 @@
     "clean": "クリーン",
     "identityUnset": "ローカルの識別情報が未設定"
   },
+  "githubCli": {
+    "setupGit": "git 認証情報を同期",
+    "setupGitDone": "git が gh を認証に使うよう設定しました。",
+    "active": "アクティブ",
+    "setActive": "アクティブにする",
+    "emptyHint": "GitHub CLI のアカウントが見つかりません。ターミナルで `gh auth login` を実行してください。",
+    "unavailable": "gh を実行できませんでした。GitHub CLI はインストールされていますか？"
+  },
   "settings": {
     "appearance": "外観",
     "theme": "テーマ",
