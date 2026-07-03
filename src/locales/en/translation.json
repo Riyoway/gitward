@@ -19,5 +19,16 @@
     "search": "Search",
     "loading": "Loading…",
     "empty": "Nothing here yet."
+  },
+  "settings": {
+    "appearance": "Appearance",
+    "theme": "Theme",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "language": "Language",
+    "behavior": "Behavior",
+    "autoSwitch": "Sync identity on launch",
+    "autoSwitchDesc": "When you open a repository, align its git identity automatically."
   }
 }
