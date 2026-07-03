@@ -6,6 +6,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import { queryClient } from '@/lib/queryClient';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useRepositoriesStore } from '@/features/repositories/store';
 import '@/lib/i18n';
 import '@/styles/global.css';
 
@@ -13,8 +14,11 @@ const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('Root element #root not found');
 
 async function bootstrap() {
-  // Apply persisted theme/language before the first paint to avoid a flash.
-  await useSettingsStore.getState().hydrate();
+  // Load persisted state before the first paint (theme/language avoid a flash).
+  await Promise.all([
+    useSettingsStore.getState().hydrate(),
+    useRepositoriesStore.getState().hydrate(),
+  ]);
 
   ReactDOM.createRoot(rootElement!).render(
     <React.StrictMode>

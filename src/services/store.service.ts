@@ -11,6 +11,7 @@ export const StoreKey = {
   Theme: 'theme',
   Language: 'language',
   AutoSwitch: 'autoSwitch',
+  Repositories: 'repositories',
 } as const;
 
 export const appStore = {

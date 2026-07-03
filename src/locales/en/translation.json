@@ -20,6 +20,18 @@
     "loading": "Loading…",
     "empty": "Nothing here yet."
   },
+  "repository": {
+    "add": "Add repository",
+    "pickTitle": "Choose a repository folder",
+    "emptyHint": "Add a repository to get started.",
+    "notARepo": "That folder is not a git repository.",
+    "alreadyAdded": "That repository is already added.",
+    "statusUnavailable": "Status unavailable",
+    "detached": "detached",
+    "dirty": "Uncommitted changes",
+    "clean": "Clean",
+    "identityUnset": "No local identity set"
+  },
   "settings": {
     "appearance": "Appearance",
     "theme": "Theme",
