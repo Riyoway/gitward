@@ -14,11 +14,26 @@
     "add": "Add",
     "cancel": "Cancel",
     "save": "Save",
+    "edit": "Edit",
     "delete": "Delete",
     "refresh": "Refresh",
     "search": "Search",
     "loading": "Loading…",
     "empty": "Nothing here yet."
+  },
+  "gitAccount": {
+    "add": "Add account",
+    "edit": "Edit account",
+    "emptyHint": "Add a git account to assign identities to your repositories.",
+    "label": "Label",
+    "labelPlaceholder": "Work, Personal, …",
+    "userName": "Name (user.name)",
+    "email": "Email (user.email)",
+    "color": "Color",
+    "error": {
+      "required": "Required",
+      "invalidEmail": "Enter a valid email address"
+    }
   },
   "repository": {
     "add": "Add repository",
