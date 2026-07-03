@@ -1,10 +1,15 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Card, CardBody, Chip, Spinner, Tooltip } from '@heroui/react';
+import { Button, Card, CardBody, Chip, Select, SelectItem, Spinner, Tooltip } from '@heroui/react';
 import { GitBranch, RefreshCw, Trash2, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { queryKeys } from '@/lib/queryKeys';
+import { firstSelectedKey } from '@/lib/selection';
 import { gitService } from '@/services/git.service';
+import { githubCliService } from '@/services/githubCli.service';
+import { useGitAccountsStore } from '@/features/git-accounts/store';
+import { useRepositoriesStore } from '../store';
+import { identityMatches } from '../sync-status';
 import type { Repository } from '../types';
 
 interface RepositoryCardProps {
@@ -15,6 +20,8 @@ interface RepositoryCardProps {
 export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const accounts = useGitAccountsStore((s) => s.accounts);
+  const update = useRepositoriesStore((s) => s.update);
 
   const status = useQuery({
     queryKey: queryKeys.repoStatus(repo.id),
@@ -24,11 +31,24 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
     queryKey: queryKeys.repoIdentity(repo.id),
     queryFn: () => gitService.readConfig(repo.path),
   });
+  // Shared across all cards (same key) — one request regardless of card count.
+  const ghAccounts = useQuery({
+    queryKey: queryKeys.ghAccounts,
+    queryFn: githubCliService.authStatus,
+  });
 
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: queryKeys.repoStatus(repo.id) });
     void queryClient.invalidateQueries({ queryKey: queryKeys.repoIdentity(repo.id) });
   };
+
+  const assignedAccount = accounts.find((a) => a.id === repo.gitAccountId);
+  const syncState =
+    assignedAccount && identity.data
+      ? identityMatches(identity.data, assignedAccount)
+        ? 'synced'
+        : 'needsSync'
+      : null;
 
   return (
     <Card shadow="sm" className="w-full">
@@ -92,6 +112,16 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
               <Chip size="sm" variant="dot" color={status.data.isDirty ? 'warning' : 'success'}>
                 {status.data.isDirty ? t('repository.dirty') : t('repository.clean')}
               </Chip>
+              {syncState === 'needsSync' && (
+                <Chip size="sm" color="warning" variant="flat">
+                  {t('repository.needsSync')}
+                </Chip>
+              )}
+              {syncState === 'synced' && (
+                <Chip size="sm" color="success" variant="flat">
+                  {t('repository.inSync')}
+                </Chip>
+              )}
             </>
           )}
         </div>
@@ -110,6 +140,52 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
           ) : (
             <span className="text-default-400">{t('common.loading')}</span>
           )}
+        </div>
+
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <Select
+            size="sm"
+            label={t('repository.gitAccount')}
+            aria-label={t('repository.gitAccount')}
+            placeholder={t('repository.unassigned')}
+            selectedKeys={repo.gitAccountId ? [repo.gitAccountId] : []}
+            isDisabled={accounts.length === 0}
+            onSelectionChange={(keys) => {
+              const id = firstSelectedKey(keys);
+              if (id) update(repo.id, { gitAccountId: id });
+            }}
+          >
+            {accounts.map((account) => (
+              <SelectItem
+                key={account.id}
+                startContent={
+                  <span
+                    className="h-3 w-3 rounded-full"
+                    style={{ backgroundColor: account.color }}
+                  />
+                }
+              >
+                {account.label}
+              </SelectItem>
+            ))}
+          </Select>
+
+          <Select
+            size="sm"
+            label={t('repository.githubAccount')}
+            aria-label={t('repository.githubAccount')}
+            placeholder={t('repository.unassigned')}
+            selectedKeys={repo.ghUsername ? [repo.ghUsername] : []}
+            isDisabled={!ghAccounts.data || ghAccounts.data.length === 0}
+            onSelectionChange={(keys) => {
+              const username = firstSelectedKey(keys);
+              if (username) update(repo.id, { ghUsername: username });
+            }}
+          >
+            {(ghAccounts.data ?? []).map((account) => (
+              <SelectItem key={account.username}>{account.username}</SelectItem>
+            ))}
+          </Select>
         </div>
       </CardBody>
     </Card>

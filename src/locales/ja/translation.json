@@ -45,7 +45,12 @@
     "detached": "detached",
     "dirty": "コミットされていない変更",
     "clean": "クリーン",
-    "identityUnset": "ローカルの識別情報が未設定"
+    "identityUnset": "ローカルの識別情報が未設定",
+    "gitAccount": "Git アカウント",
+    "githubAccount": "GitHub",
+    "unassigned": "未割り当て",
+    "needsSync": "要同期",
+    "inSync": "同期済み"
   },
   "githubCli": {
     "setupGit": "git 認証情報を同期",

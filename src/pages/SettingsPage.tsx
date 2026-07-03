@@ -1,9 +1,9 @@
-import type { Key } from 'react';
 import { Card, CardBody, Select, SelectItem, Switch } from '@heroui/react';
 import { useTranslation } from 'react-i18next';
 
 import { Page } from '@/components/layout/Page';
 import type { Language } from '@/lib/i18n';
+import { firstSelectedKey } from '@/lib/selection';
 import type { Theme } from '@/lib/theme';
 import { useSettingsStore } from '@/stores/settingsStore';
 
@@ -12,11 +12,6 @@ const LANGUAGES: { key: Language; label: string }[] = [
   { key: 'ja', label: '日本語' },
   { key: 'en', label: 'English' },
 ];
-
-function firstKey<T extends string>(keys: 'all' | Set<Key>): T | undefined {
-  if (keys === 'all') return undefined;
-  return [...keys][0] as T | undefined;
-}
 
 export function SettingsPage() {
   const { t } = useTranslation();
@@ -38,7 +33,7 @@ export function SettingsPage() {
             label={t('settings.theme')}
             selectedKeys={[theme]}
             onSelectionChange={(keys) => {
-              const value = firstKey<Theme>(keys);
+              const value = firstSelectedKey<Theme>(keys);
               if (value) setTheme(value);
             }}
             className="max-w-xs"
@@ -52,7 +47,7 @@ export function SettingsPage() {
             label={t('settings.language')}
             selectedKeys={[language]}
             onSelectionChange={(keys) => {
-              const value = firstKey<Language>(keys);
+              const value = firstSelectedKey<Language>(keys);
               if (value) setLanguage(value);
             }}
             className="max-w-xs"

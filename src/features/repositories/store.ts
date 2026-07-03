@@ -10,7 +10,7 @@ interface RepositoriesState {
   hydrate: () => Promise<void>;
   add: (repo: Repository) => void;
   remove: (id: string) => void;
-  rename: (id: string, name: string) => void;
+  update: (id: string, patch: Partial<Omit<Repository, 'id'>>) => void;
 }
 
 function persist(repositories: Repository[]) {
@@ -42,8 +42,8 @@ export const useRepositoriesStore = create<RepositoriesState>((set, get) => ({
     persist(repositories);
   },
 
-  rename: (id, name) => {
-    const repositories = get().repositories.map((r) => (r.id === id ? { ...r, name } : r));
+  update: (id, patch) => {
+    const repositories = get().repositories.map((r) => (r.id === id ? { ...r, ...patch } : r));
     set({ repositories });
     persist(repositories);
   },

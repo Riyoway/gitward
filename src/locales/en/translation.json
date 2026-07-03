@@ -45,7 +45,12 @@
     "detached": "detached",
     "dirty": "Uncommitted changes",
     "clean": "Clean",
-    "identityUnset": "No local identity set"
+    "identityUnset": "No local identity set",
+    "gitAccount": "Git account",
+    "githubAccount": "GitHub",
+    "unassigned": "Unassigned",
+    "needsSync": "Needs sync",
+    "inSync": "In sync"
   },
   "githubCli": {
     "setupGit": "Sync git credentials",

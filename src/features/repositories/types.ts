@@ -7,4 +7,8 @@ export interface Repository {
   path: string;
   /** ISO timestamp of when it was added. */
   addedAt: string;
+  /** Assigned git identity ([`GitAccount`](../git-accounts/types).id). */
+  gitAccountId?: string;
+  /** Assigned GitHub CLI account (username). */
+  ghUsername?: string;
 }
