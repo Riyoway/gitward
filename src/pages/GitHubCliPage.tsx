@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Page } from '@/components/layout/Page';
 import { queryKeys } from '@/lib/queryKeys';
+import { toastError, toastSuccess } from '@/lib/toast';
 import { credentialService } from '@/services/credential.service';
 import { githubCliService } from '@/services/githubCli.service';
 import { useLogsStore } from '@/features/logs/store';
@@ -35,9 +36,11 @@ export function GitHubCliPage() {
     onSuccess: (_data, username) => {
       refreshGh();
       recordLog({ action: 'ghSwitch', target: username, success: true });
+      toastSuccess(t('githubCli.switched', { name: username }));
     },
     onError: (error, username) => {
       recordLog({ action: 'ghSwitch', target: username, success: false, detail: (error as Error).message });
+      toastError(t('githubCli.switchFailed'), (error as Error).message);
     },
   });
 
@@ -46,9 +49,12 @@ export function GitHubCliPage() {
     onSuccess: () => {
       refreshGh();
       recordLog({ action: 'setupGit', target: 'git', success: true });
+      toastSuccess(t('githubCli.setupGitDone'));
     },
-    onError: (error) =>
-      recordLog({ action: 'setupGit', target: 'git', success: false, detail: (error as Error).message }),
+    onError: (error) => {
+      recordLog({ action: 'setupGit', target: 'git', success: false, detail: (error as Error).message });
+      toastError(t('githubCli.setupGitFailed'), (error as Error).message);
+    },
   });
 
   const actions = (

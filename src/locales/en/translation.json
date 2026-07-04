@@ -59,7 +59,9 @@
     "filterByAccount": "Filter by account",
     "allAccounts": "All accounts",
     "favoritesOnly": "Favorites",
-    "noMatches": "No repositories match your filters."
+    "noMatches": "No repositories match your filters.",
+    "syncDone": "Synced {{name}}",
+    "syncFailed": "Sync failed"
   },
   "logs": {
     "empty": "No activity yet. Sync a repository or switch accounts to see logs here.",
@@ -84,7 +86,10 @@
     "active": "Active",
     "setActive": "Set active",
     "emptyHint": "No GitHub CLI accounts found. Run `gh auth login` in a terminal.",
-    "unavailable": "Could not run gh. Is the GitHub CLI installed?"
+    "unavailable": "Could not run gh. Is the GitHub CLI installed?",
+    "switched": "Switched to {{name}}",
+    "switchFailed": "Switch failed",
+    "setupGitFailed": "Setup failed"
   },
   "credential": {
     "health": "Credential health",

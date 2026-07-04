@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 
 import { queryKeys } from '@/lib/queryKeys';
 import { firstSelectedKey } from '@/lib/selection';
+import { toastError, toastSuccess } from '@/lib/toast';
 import { gitService } from '@/services/git.service';
 import { githubCliService } from '@/services/githubCli.service';
 import { launcherService } from '@/services/launcher.service';
@@ -96,9 +97,12 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
         success: report.overallSuccess,
         detail: report.overallSuccess ? undefined : failureMessage(report),
       });
+      if (report.overallSuccess) toastSuccess(t('repository.syncDone', { name: repo.name }));
+      else toastError(t('repository.syncFailed'), failureMessage(report));
     },
     onError: (error) => {
       recordLog({ action: 'sync', target: repo.name, success: false, detail: (error as Error).message });
+      toastError(t('repository.syncFailed'), (error as Error).message);
     },
   });
   const syncState =
