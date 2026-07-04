@@ -26,6 +26,7 @@ import { launcherService } from '@/services/launcher.service';
 import { syncService } from '@/services/sync.service';
 import { useGitAccountsStore } from '@/features/git-accounts/store';
 import { useLogsStore } from '@/features/logs/store';
+import { useSettingsStore } from '@/stores/settingsStore';
 import type { SyncReport } from '@/types';
 import { useRepositoriesStore } from '../store';
 import { identityMatches } from '../sync-status';
@@ -52,6 +53,7 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
   const toggleFavorite = useRepositoriesStore((s) => s.toggleFavorite);
   const markOpened = useRepositoriesStore((s) => s.markOpened);
   const recordLog = useLogsStore((s) => s.record);
+  const autoSwitch = useSettingsStore((s) => s.autoSwitch);
 
   const status = useQuery({
     queryKey: queryKeys.repoStatus(repo.id),
@@ -126,6 +128,10 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
     setOpenError(null);
     try {
       if (key.startsWith('tool:')) {
+        // Auto-switch: align identity before opening if it has drifted.
+        if (autoSwitch && assignedAccount && syncState === 'needsSync') {
+          await sync.mutateAsync();
+        }
         await launcherService.launchTool(key.slice(5), repo.path);
         markOpened(repo.id);
       } else if (key === 'reveal') await launcherService.revealInExplorer(repo.path);
