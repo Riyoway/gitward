@@ -39,6 +39,27 @@ impl<T> CommandResult<T> {
     }
 }
 
+/// Run a blocking command body on the blocking thread pool so it never stalls
+/// the main (UI) thread. Tauri runs non-async commands on the main thread, so
+/// every command that shells out or touches the network must go through this.
+pub async fn run_blocking<T, F>(f: F) -> CommandResult<T>
+where
+    F: FnOnce() -> CommandResult<T> + Send + 'static,
+    T: Send + 'static,
+{
+    match tauri::async_runtime::spawn_blocking(f).await {
+        Ok(result) => result,
+        Err(err) => CommandResult {
+            success: false,
+            data: None,
+            stdout: String::new(),
+            stderr: String::new(),
+            exit_code: None,
+            error: Some(format!("task failed: {err}")),
+        },
+    }
+}
+
 impl<T> From<AppError> for CommandResult<T> {
     fn from(err: AppError) -> Self {
         let message = err.to_string();

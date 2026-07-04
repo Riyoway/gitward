@@ -3,18 +3,18 @@
 use std::process::Command;
 
 use crate::error::{AppError, AppResult};
-use crate::models::result::CommandResult;
+use crate::models::result::{run_blocking, CommandResult};
 use crate::services::command::SystemRunner;
 use crate::services::launcher::{self, Invocation, Tool};
 
 #[tauri::command]
-pub fn detect_tools() -> CommandResult<Vec<Tool>> {
-    CommandResult::ok(launcher::detect_tools(&SystemRunner))
+pub async fn detect_tools() -> CommandResult<Vec<Tool>> {
+    run_blocking(|| CommandResult::ok(launcher::detect_tools(&SystemRunner))).await
 }
 
 #[tauri::command]
-pub fn launch_tool(tool_id: String, path: String) -> CommandResult<()> {
-    CommandResult::from_result(spawn_tool(&tool_id, &path))
+pub async fn launch_tool(tool_id: String, path: String) -> CommandResult<()> {
+    run_blocking(move || CommandResult::from_result(spawn_tool(&tool_id, &path))).await
 }
 
 fn spawn_tool(tool_id: &str, path: &str) -> AppResult<()> {

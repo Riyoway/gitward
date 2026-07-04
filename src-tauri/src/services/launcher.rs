@@ -101,15 +101,17 @@ pub fn resolve_launch(tool_id: &str, path: &str) -> AppResult<Invocation> {
     })
 }
 
+// Detect by resolving the executable on PATH, never by launching it — running a
+// tool (e.g. `wt --version`) can pop a GUI dialog and block. `where`/`command -v`
+// just report whether the program exists and exit fast.
 #[cfg(windows)]
 fn probe(runner: &dyn CommandRunner, program: &str) -> AppResult<CommandOutput> {
-    // Editor launchers ship as `.cmd` shims that resolve only via the shell.
-    runner.run("cmd", &["/C", program, "--version"], None)
+    runner.run("where", &[program], None)
 }
 
 #[cfg(not(windows))]
 fn probe(runner: &dyn CommandRunner, program: &str) -> AppResult<CommandOutput> {
-    runner.run(program, &["--version"], None)
+    runner.run("sh", &["-c", &format!("command -v {program}")], None)
 }
 
 #[cfg(test)]
