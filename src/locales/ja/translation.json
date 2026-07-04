@@ -96,6 +96,11 @@
     "language": "言語",
     "behavior": "動作",
     "autoSwitch": "起動時にアイデンティティを同期",
-    "autoSwitchDesc": "リポジトリを開いたとき、git アイデンティティを自動的に合わせます。"
+    "autoSwitchDesc": "リポジトリを開いたとき、git アイデンティティを自動的に合わせます。",
+    "diagnostics": "診断",
+    "internet": "インターネット",
+    "detectedTools": "検出されたツール",
+    "toolsNone": "検出されませんでした",
+    "healthUnavailable": "診断を実行できませんでした。"
   }
 }

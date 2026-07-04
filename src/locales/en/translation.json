@@ -96,6 +96,11 @@
     "language": "Language",
     "behavior": "Behavior",
     "autoSwitch": "Sync identity on launch",
-    "autoSwitchDesc": "When you open a repository, align its git identity automatically."
+    "autoSwitchDesc": "When you open a repository, align its git identity automatically.",
+    "diagnostics": "Diagnostics",
+    "internet": "Internet",
+    "detectedTools": "Detected tools",
+    "toolsNone": "None detected",
+    "healthUnavailable": "Could not run diagnostics."
   }
 }

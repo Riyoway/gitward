@@ -47,6 +47,15 @@ export interface Tool {
   installed: boolean;
 }
 
+/** Environment health check. */
+export interface HealthReport {
+  git: boolean;
+  gh: boolean;
+  ssh: boolean;
+  internet: boolean;
+  tools: Tool[];
+}
+
 /** One step of a sync operation. */
 export interface SyncStep {
   name: string;

@@ -5,4 +5,5 @@ export const queryKeys = {
   ghAccounts: ['gh-accounts'] as const,
   credentialDiagnosis: ['credential-diagnosis'] as const,
   tools: ['tools'] as const,
+  health: ['health'] as const,
 };

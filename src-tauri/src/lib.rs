@@ -16,6 +16,7 @@ pub fn run() {
             commands::git::git_read_config,
             commands::git::git_set_config,
             commands::git::git_status,
+            commands::health::health_check,
             commands::github_cli::gh_auth_status,
             commands::github_cli::gh_auth_switch,
             commands::github_cli::gh_auth_setup_git,
