@@ -14,7 +14,7 @@ import {
   Spinner,
   Tooltip,
 } from '@heroui/react';
-import { ArrowRightLeft, ChevronDown, FolderOpen, GitBranch, RefreshCw, Trash2, User } from 'lucide-react';
+import { ArrowRightLeft, ChevronDown, FolderOpen, GitBranch, RefreshCw, Star, Trash2, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { queryKeys } from '@/lib/queryKeys';
@@ -48,6 +48,8 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
   const queryClient = useQueryClient();
   const accounts = useGitAccountsStore((s) => s.accounts);
   const update = useRepositoriesStore((s) => s.update);
+  const toggleFavorite = useRepositoriesStore((s) => s.toggleFavorite);
+  const markOpened = useRepositoriesStore((s) => s.markOpened);
   const recordLog = useLogsStore((s) => s.record);
 
   const status = useQuery({
@@ -119,8 +121,10 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
   const handleOpen = async (key: string) => {
     setOpenError(null);
     try {
-      if (key.startsWith('tool:')) await launcherService.launchTool(key.slice(5), repo.path);
-      else if (key === 'reveal') await launcherService.revealInExplorer(repo.path);
+      if (key.startsWith('tool:')) {
+        await launcherService.launchTool(key.slice(5), repo.path);
+        markOpened(repo.id);
+      } else if (key === 'reveal') await launcherService.revealInExplorer(repo.path);
       else if (key === 'remote' && remoteUrl) await launcherService.openRemote(remoteUrl);
     } catch (e) {
       setOpenError(e instanceof Error ? e.message : String(e));
@@ -138,6 +142,21 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-1">
+            <Tooltip content={t('repository.favorite')} closeDelay={0}>
+              <Button
+                isIconOnly
+                size="sm"
+                variant="light"
+                aria-label={t('repository.favorite')}
+                onPress={() => toggleFavorite(repo.id)}
+              >
+                <Star
+                  size={15}
+                  className={repo.favorite ? 'text-warning' : ''}
+                  fill={repo.favorite ? 'currentColor' : 'none'}
+                />
+              </Button>
+            </Tooltip>
             <Tooltip content={t('common.refresh')} closeDelay={0}>
               <Button
                 isIconOnly

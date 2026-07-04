@@ -11,6 +11,8 @@ interface RepositoriesState {
   add: (repo: Repository) => void;
   remove: (id: string) => void;
   update: (id: string, patch: Partial<Omit<Repository, 'id'>>) => void;
+  toggleFavorite: (id: string) => void;
+  markOpened: (id: string) => void;
 }
 
 function persist(repositories: Repository[]) {
@@ -44,6 +46,23 @@ export const useRepositoriesStore = create<RepositoriesState>((set, get) => ({
 
   update: (id, patch) => {
     const repositories = get().repositories.map((r) => (r.id === id ? { ...r, ...patch } : r));
+    set({ repositories });
+    persist(repositories);
+  },
+
+  toggleFavorite: (id) => {
+    const repositories = get().repositories.map((r) =>
+      r.id === id ? { ...r, favorite: !r.favorite } : r,
+    );
+    set({ repositories });
+    persist(repositories);
+  },
+
+  markOpened: (id) => {
+    const now = new Date().toISOString();
+    const repositories = get().repositories.map((r) =>
+      r.id === id ? { ...r, lastOpenedAt: now } : r,
+    );
     set({ repositories });
     persist(repositories);
   },

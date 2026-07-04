@@ -11,4 +11,8 @@ export interface Repository {
   gitAccountId?: string;
   /** Assigned GitHub CLI account (username). */
   ghUsername?: string;
+  /** Pinned to the top of the list. */
+  favorite?: boolean;
+  /** ISO timestamp of the last time a tool was launched here. */
+  lastOpenedAt?: string;
 }

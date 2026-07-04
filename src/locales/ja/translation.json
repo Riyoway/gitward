@@ -51,7 +51,15 @@
     "unassigned": "未割り当て",
     "needsSync": "要同期",
     "inSync": "同期済み",
-    "sync": "同期"
+    "sync": "同期",
+    "favorite": "お気に入り",
+    "sortBy": "並び替え",
+    "sortName": "名前",
+    "sortRecent": "最近",
+    "filterByAccount": "アカウントで絞り込み",
+    "allAccounts": "すべてのアカウント",
+    "favoritesOnly": "お気に入りのみ",
+    "noMatches": "条件に一致するリポジトリがありません。"
   },
   "logs": {
     "empty": "まだ操作履歴がありません。リポジトリを Sync したりアカウントを切り替えると、ここに記録されます。",

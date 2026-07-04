@@ -51,7 +51,15 @@
     "unassigned": "Unassigned",
     "needsSync": "Needs sync",
     "inSync": "In sync",
-    "sync": "Sync"
+    "sync": "Sync",
+    "favorite": "Favorite",
+    "sortBy": "Sort by",
+    "sortName": "Name",
+    "sortRecent": "Recent",
+    "filterByAccount": "Filter by account",
+    "allAccounts": "All accounts",
+    "favoritesOnly": "Favorites",
+    "noMatches": "No repositories match your filters."
   },
   "logs": {
     "empty": "No activity yet. Sync a repository or switch accounts to see logs here.",

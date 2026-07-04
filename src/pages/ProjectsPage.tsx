@@ -1,12 +1,16 @@
 import { useState } from 'react';
-import { Button } from '@heroui/react';
-import { FolderPlus } from 'lucide-react';
+import { Button, Input, Select, SelectItem, Switch } from '@heroui/react';
+import { FolderPlus, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Page } from '@/components/layout/Page';
+import { firstSelectedKey } from '@/lib/selection';
 import { RepositoryCard } from '@/features/repositories/components/RepositoryCard';
+import { filterAndSortRepos, type RepoSort } from '@/features/repositories/filtering';
 import { deriveRepoName } from '@/features/repositories/naming';
 import { useRepositoriesStore } from '@/features/repositories/store';
+import { useGitAccountsStore } from '@/features/git-accounts/store';
+import { useUiStore } from '@/stores/uiStore';
 import { pickDirectory } from '@/services/dialog.service';
 import { gitService } from '@/services/git.service';
 
@@ -15,9 +19,18 @@ export function ProjectsPage() {
   const repositories = useRepositoriesStore((s) => s.repositories);
   const add = useRepositoriesStore((s) => s.add);
   const remove = useRepositoriesStore((s) => s.remove);
+  const accounts = useGitAccountsStore((s) => s.accounts);
+  const ui = useUiStore();
 
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  const visible = filterAndSortRepos(repositories, {
+    search: ui.search,
+    sortBy: ui.sortBy,
+    gitAccountId: ui.filterGitAccountId,
+    favoritesOnly: ui.favoritesOnly,
+  });
 
   async function handleAdd() {
     setError(null);
@@ -65,11 +78,61 @@ export function ProjectsPage() {
       {repositories.length === 0 ? (
         <p className="text-sm text-default-500">{t('repository.emptyHint')}</p>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {repositories.map((repo) => (
-            <RepositoryCard key={repo.id} repo={repo} onRemove={remove} />
-          ))}
-        </div>
+        <>
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              size="sm"
+              className="max-w-xs"
+              placeholder={t('common.search')}
+              value={ui.search}
+              onValueChange={ui.setSearch}
+              startContent={<Search size={15} className="text-default-400" />}
+              isClearable
+              onClear={() => ui.setSearch('')}
+            />
+            <Select
+              size="sm"
+              className="w-36"
+              aria-label={t('repository.sortBy')}
+              selectedKeys={[ui.sortBy]}
+              onSelectionChange={(keys) => {
+                const value = firstSelectedKey<RepoSort>(keys);
+                if (value) ui.setSortBy(value);
+              }}
+            >
+              <SelectItem key="name">{t('repository.sortName')}</SelectItem>
+              <SelectItem key="recent">{t('repository.sortRecent')}</SelectItem>
+            </Select>
+            <Select
+              size="sm"
+              className="w-44"
+              aria-label={t('repository.filterByAccount')}
+              selectedKeys={[ui.filterGitAccountId ?? 'all']}
+              onSelectionChange={(keys) => {
+                const value = firstSelectedKey<string>(keys);
+                ui.setFilterGitAccountId(value && value !== 'all' ? value : null);
+              }}
+            >
+              {[
+                <SelectItem key="all">{t('repository.allAccounts')}</SelectItem>,
+                ...accounts.map((a) => <SelectItem key={a.id}>{a.label}</SelectItem>),
+              ]}
+            </Select>
+            <Switch size="sm" isSelected={ui.favoritesOnly} onValueChange={ui.setFavoritesOnly}>
+              <span className="text-sm">{t('repository.favoritesOnly')}</span>
+            </Switch>
+          </div>
+
+          {visible.length === 0 ? (
+            <p className="text-sm text-default-500">{t('repository.noMatches')}</p>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {visible.map((repo) => (
+                <RepositoryCard key={repo.id} repo={repo} onRemove={remove} />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </Page>
   );
