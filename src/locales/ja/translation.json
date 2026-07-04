@@ -114,6 +114,15 @@
     "internet": "インターネット",
     "detectedTools": "検出されたツール",
     "toolsNone": "検出されませんでした",
-    "healthUnavailable": "診断を実行できませんでした。"
+    "healthUnavailable": "診断を実行できませんでした。",
+    "data": "データ",
+    "dataDesc": "アカウント・リポジトリ・設定をエクスポート、または別のマシンで復元できます。",
+    "export": "エクスポート",
+    "import": "インポート",
+    "importTitle": "バックアップファイルを選択",
+    "exportDone": "エクスポートしました。",
+    "exportFailed": "エクスポートに失敗しました",
+    "importDone": "インポートしました。",
+    "importFailed": "インポートに失敗しました"
   }
 }

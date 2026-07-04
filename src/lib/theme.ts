@@ -23,7 +23,8 @@ export function applyTheme(theme: Theme): void {
  * has chosen `system`. Returns an unsubscribe function.
  */
 export function watchSystemTheme(getTheme: () => Theme): () => void {
-  const media = window.matchMedia('(prefers-color-scheme: dark)');
+  const media = window.matchMedia?.('(prefers-color-scheme: dark)');
+  if (!media) return () => {};
   const listener = () => {
     if (getTheme() === 'system') applyTheme('system');
   };

@@ -8,6 +8,7 @@ interface GitAccountsState {
   hydrated: boolean;
 
   hydrate: () => Promise<void>;
+  setAll: (accounts: GitAccount[]) => void;
   add: (draft: GitAccountDraft) => void;
   update: (id: string, draft: GitAccountDraft) => void;
   remove: (id: string) => void;
@@ -28,6 +29,11 @@ export const useGitAccountsStore = create<GitAccountsState>((set, get) => ({
     } catch {
       set({ hydrated: true });
     }
+  },
+
+  setAll: (accounts) => {
+    set({ accounts });
+    persist(accounts);
   },
 
   add: (draft) => {

@@ -12,6 +12,8 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
             commands::credential::credential_diagnose,
+            commands::fs::write_text_file,
+            commands::fs::read_text_file,
             commands::git::git_is_repo,
             commands::git::git_read_config,
             commands::git::git_set_config,

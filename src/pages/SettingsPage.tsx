@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Button, Card, CardBody, Chip, Select, SelectItem, Spinner, Switch } from '@heroui/react';
-import { Check, RefreshCw, X } from 'lucide-react';
+import { Check, Download, RefreshCw, Upload, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Page } from '@/components/layout/Page';
@@ -8,6 +8,10 @@ import type { Language } from '@/lib/i18n';
 import { queryKeys } from '@/lib/queryKeys';
 import { firstSelectedKey } from '@/lib/selection';
 import type { Theme } from '@/lib/theme';
+import { toastError, toastSuccess } from '@/lib/toast';
+import { applyBackup, buildBackup, parseBackup } from '@/features/backup/backup';
+import { pickJsonFile, pickSavePath } from '@/services/dialog.service';
+import { fsService } from '@/services/fs.service';
 import { healthService } from '@/services/health.service';
 import { useSettingsStore } from '@/stores/settingsStore';
 
@@ -35,6 +39,28 @@ export function SettingsPage() {
   const { theme, language, autoSwitch, setTheme, setLanguage, setAutoSwitch } = useSettingsStore();
   const health = useQuery({ queryKey: queryKeys.health, queryFn: healthService.check });
   const installedTools = (health.data?.tools ?? []).filter((tool) => tool.installed);
+
+  async function handleExport() {
+    try {
+      const path = await pickSavePath('gitward-backup.json');
+      if (!path) return;
+      await fsService.writeTextFile(path, JSON.stringify(buildBackup(), null, 2));
+      toastSuccess(t('settings.exportDone'));
+    } catch (e) {
+      toastError(t('settings.exportFailed'), e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  async function handleImport() {
+    try {
+      const path = await pickJsonFile(t('settings.importTitle'));
+      if (!path) return;
+      applyBackup(parseBackup(await fsService.readTextFile(path)));
+      toastSuccess(t('settings.importDone'));
+    } catch (e) {
+      toastError(t('settings.importFailed'), e instanceof Error ? e.message : String(e));
+    }
+  }
 
   const themeLabels: Record<Theme, string> = {
     system: t('settings.themeSystem'),
@@ -133,6 +159,21 @@ export function SettingsPage() {
               </div>
             </>
           )}
+        </CardBody>
+      </Card>
+
+      <Card shadow="sm">
+        <CardBody className="gap-4 p-6">
+          <h2 className="text-sm font-medium text-default-500">{t('settings.data')}</h2>
+          <p className="text-xs text-default-400">{t('settings.dataDesc')}</p>
+          <div className="flex gap-2">
+            <Button variant="flat" startContent={<Download size={16} />} onPress={handleExport}>
+              {t('settings.export')}
+            </Button>
+            <Button variant="flat" startContent={<Upload size={16} />} onPress={handleImport}>
+              {t('settings.import')}
+            </Button>
+          </div>
         </CardBody>
       </Card>
     </Page>

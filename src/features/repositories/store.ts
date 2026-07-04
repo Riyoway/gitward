@@ -8,6 +8,7 @@ interface RepositoriesState {
   hydrated: boolean;
 
   hydrate: () => Promise<void>;
+  setAll: (repositories: Repository[]) => void;
   add: (repo: Repository) => void;
   remove: (id: string) => void;
   update: (id: string, patch: Partial<Omit<Repository, 'id'>>) => void;
@@ -30,6 +31,11 @@ export const useRepositoriesStore = create<RepositoriesState>((set, get) => ({
     } catch {
       set({ hydrated: true });
     }
+  },
+
+  setAll: (repositories) => {
+    set({ repositories });
+    persist(repositories);
   },
 
   add: (repo) => {
