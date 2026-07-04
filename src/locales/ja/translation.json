@@ -78,6 +78,15 @@
     "emptyHint": "GitHub CLI のアカウントが見つかりません。ターミナルで `gh auth login` を実行してください。",
     "unavailable": "gh を実行できませんでした。GitHub CLI はインストールされていますか？"
   },
+  "credential": {
+    "health": "認証情報の健全性",
+    "ghActive": "gh アクティブ",
+    "gcmStored": "資格情報マネージャ",
+    "none": "なし",
+    "ok": "一致",
+    "mismatch": "不一致",
+    "mismatchHint": "アクティブな gh アカウントが資格情報ストアにありません。「git 認証情報を同期」で修正できます。"
+  },
   "settings": {
     "appearance": "外観",
     "theme": "テーマ",

@@ -78,6 +78,15 @@
     "emptyHint": "No GitHub CLI accounts found. Run `gh auth login` in a terminal.",
     "unavailable": "Could not run gh. Is the GitHub CLI installed?"
   },
+  "credential": {
+    "health": "Credential health",
+    "ghActive": "gh active",
+    "gcmStored": "Credential manager",
+    "none": "none",
+    "ok": "Aligned",
+    "mismatch": "Mismatch",
+    "mismatchHint": "The active gh account isn't in the credential store. Run \"Sync git credentials\" to realign."
+  },
   "settings": {
     "appearance": "Appearance",
     "theme": "Theme",

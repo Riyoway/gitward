@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button, Card, CardBody, Chip, Spinner } from '@heroui/react';
-import { Check, CircleUserRound, Link2, RefreshCw } from 'lucide-react';
+import { Check, CircleUserRound, Link2, RefreshCw, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Page } from '@/components/layout/Page';
 import { queryKeys } from '@/lib/queryKeys';
+import { credentialService } from '@/services/credential.service';
 import { githubCliService } from '@/services/githubCli.service';
 import { useLogsStore } from '@/features/logs/store';
 import type { GhAccount } from '@/types';
@@ -19,10 +20,20 @@ export function GitHubCliPage() {
     queryFn: githubCliService.authStatus,
   });
 
+  const diagnosis = useQuery({
+    queryKey: queryKeys.credentialDiagnosis,
+    queryFn: credentialService.diagnose,
+  });
+
+  const refreshGh = () => {
+    void queryClient.invalidateQueries({ queryKey: queryKeys.ghAccounts });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.credentialDiagnosis });
+  };
+
   const switchAccount = useMutation({
     mutationFn: githubCliService.authSwitch,
     onSuccess: (_data, username) => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.ghAccounts });
+      refreshGh();
       recordLog({ action: 'ghSwitch', target: username, success: true });
     },
     onError: (error, username) => {
@@ -32,7 +43,10 @@ export function GitHubCliPage() {
 
   const setupGit = useMutation({
     mutationFn: githubCliService.setupGit,
-    onSuccess: () => recordLog({ action: 'setupGit', target: 'git', success: true }),
+    onSuccess: () => {
+      refreshGh();
+      recordLog({ action: 'setupGit', target: 'git', success: true });
+    },
     onError: (error) =>
       recordLog({ action: 'setupGit', target: 'git', success: false, detail: (error as Error).message }),
   });
@@ -47,12 +61,7 @@ export function GitHubCliPage() {
       >
         {t('githubCli.setupGit')}
       </Button>
-      <Button
-        isIconOnly
-        variant="light"
-        aria-label={t('common.refresh')}
-        onPress={() => accounts.refetch()}
-      >
+      <Button isIconOnly variant="light" aria-label={t('common.refresh')} onPress={refreshGh}>
         <RefreshCw size={16} />
       </Button>
     </>
@@ -63,6 +72,38 @@ export function GitHubCliPage() {
       {setupGit.isSuccess && <p className="text-sm text-success">{t('githubCli.setupGitDone')}</p>}
       {switchAccount.isError && (
         <p className="text-sm text-danger">{(switchAccount.error as Error).message}</p>
+      )}
+
+      {diagnosis.data && (
+        <Card shadow="sm">
+          <CardBody className="flex flex-row items-center gap-3 p-4">
+            {diagnosis.data.mismatch ? (
+              <ShieldAlert size={22} className="shrink-0 text-warning" />
+            ) : (
+              <ShieldCheck size={22} className="shrink-0 text-success" />
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium">{t('credential.health')}</p>
+              <p className="truncate text-xs text-default-500">
+                {t('credential.ghActive')}: {diagnosis.data.ghUser ?? '—'} ·{' '}
+                {t('credential.gcmStored')}:{' '}
+                {diagnosis.data.gcmUsers.length > 0
+                  ? diagnosis.data.gcmUsers.join(', ')
+                  : t('credential.none')}
+              </p>
+              {diagnosis.data.mismatch && (
+                <p className="mt-1 text-xs text-warning">{t('credential.mismatchHint')}</p>
+              )}
+            </div>
+            <Chip
+              size="sm"
+              variant="flat"
+              color={diagnosis.data.mismatch ? 'warning' : 'success'}
+            >
+              {diagnosis.data.mismatch ? t('credential.mismatch') : t('credential.ok')}
+            </Chip>
+          </CardBody>
+        </Card>
       )}
 
       {accounts.isPending ? (

@@ -32,6 +32,13 @@ export interface GhAccount {
   scopes: string[];
 }
 
+/** Cross-check of the active gh account against Git Credential Manager. */
+export interface CredentialDiagnosis {
+  ghUser: string | null;
+  gcmUsers: string[];
+  mismatch: boolean;
+}
+
 /** A developer tool Gitward can launch, and whether it is installed. */
 export interface Tool {
   id: string;
