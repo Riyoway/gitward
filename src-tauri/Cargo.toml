@@ -26,7 +26,7 @@ serde = { version = "1", features = ["derive"] }
 # preserve_order keeps existing key order when we rewrite package.json / tauri.conf.json.
 serde_json = { version = "1", features = ["preserve_order"] }
 # Format-preserving edits to Cargo.toml.
-toml_edit = "0.22"
+toml_edit = "0.25"
 thiserror = "2"
 
 [dev-dependencies]
