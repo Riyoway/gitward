@@ -3,14 +3,14 @@
 **Keep the right identity on every repository.**
 
 Gitward is a desktop workspace manager for people who juggle multiple Git
-identities. Work and personal accounts, a client's org, an alt for open source —
+identities. Work and personal accounts, a client's org, an alt for open source:
 each repository needs the right `user.name`/`user.email`, the right GitHub CLI
 account, and the matching credential in the OS store. Get one wrong and you push
 as the wrong person, leak an email, or fight an auth prompt.
 
 Gitward makes the correct identity the default. Register your repositories once,
 attach the git and GitHub accounts they belong to, and **Sync** aligns local git
-config, `gh` auth, and the credential manager in a single action — then launches
+config, `gh` auth, and the credential manager in a single action, then launches
 your editor or terminal in the right place.
 
 ## Why
@@ -29,7 +29,7 @@ your editor or terminal in the right place.
 The frontend holds all UI and state; every side effect (running `git`, `gh`,
 the credential manager, spawning tools) is delegated to a stateless Rust
 backend over Tauri IPC. External commands go through a single `CommandRunner`
-abstraction, so every result carries `stdout`, `stderr`, and exit code — and the
+abstraction, so every result carries `stdout`, `stderr`, and exit code, and the
 backend is testable without touching a real `git` or `gh`.
 
 ```

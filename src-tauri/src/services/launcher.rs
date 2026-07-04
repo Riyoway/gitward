@@ -101,7 +101,7 @@ pub fn resolve_launch(tool_id: &str, path: &str) -> AppResult<Invocation> {
     })
 }
 
-// Detect by resolving the executable on PATH, never by launching it — running a
+// Detect by resolving the executable on PATH, never by launching it. Running a
 // tool (e.g. `wt --version`) can pop a GUI dialog and block. `where`/`command -v`
 // just report whether the program exists and exit fast.
 #[cfg(windows)]

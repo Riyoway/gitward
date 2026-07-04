@@ -1,7 +1,7 @@
 //! Cross-checking the active `gh` account against Git Credential Manager.
 //!
 //! A common failure: `gh` is switched to account A, but the credential manager
-//! still hands git account B's token — so pushes authenticate as B.
+//! still hands git account B's token, so pushes authenticate as B.
 
 use serde::Serialize;
 
@@ -33,7 +33,7 @@ pub fn diagnose(runner: &dyn CommandRunner) -> AppResult<CredentialDiagnosis> {
         .find(|a| a.active)
         .map(|a| a.username);
 
-    // If GCM is absent or errors, treat it as "nothing stored" — not a mismatch.
+    // If GCM is absent or errors, treat it as "nothing stored", not a mismatch.
     let gcm_users = list(runner).unwrap_or_default();
 
     let mismatch = match &gh_user {

@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Keep the right identity on every repository. A desktop workspace manager that syncs per-repo git identity, GitHub CLI accounts, and credentials — then launches your tools.",
+  "description": "Keep the right identity on every repository. A desktop workspace manager that syncs per-repo git identity, GitHub CLI accounts, and credentials, then launches your tools.",
   "author": "Riyoway",
   "license": "MIT",
   "homepage": "https://github.com/Riyoway/gitward#readme",

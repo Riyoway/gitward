@@ -63,7 +63,7 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
     queryKey: queryKeys.repoIdentity(repo.id),
     queryFn: () => gitService.readConfig(repo.path),
   });
-  // Shared across all cards (same key) — one request regardless of card count.
+  // Shared across all cards (same key): one request regardless of card count.
   const ghAccounts = useQuery({
     queryKey: queryKeys.ghAccounts,
     queryFn: githubCliService.authStatus,
@@ -237,7 +237,7 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
           {identity.data ? (
             identity.data.userName || identity.data.email ? (
               <span className="truncate">
-                {identity.data.userName ?? '—'}
+                {identity.data.userName ?? '-'}
                 {identity.data.email ? ` <${identity.data.email}>` : ''}
               </span>
             ) : (

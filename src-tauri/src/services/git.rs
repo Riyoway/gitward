@@ -86,8 +86,8 @@ fn ensure_repo(path: &str) -> AppResult<()> {
     }
 }
 
-/// `git config --get` exits 1 when a key is unset — that is "no value", not an
-/// error. Any other non-zero exit is a real failure.
+/// `git config --get` exits 1 when a key is unset (that is "no value", not an
+/// error). Any other non-zero exit is a real failure.
 fn read_key(runner: &dyn CommandRunner, path: &str, key: &str) -> AppResult<Option<String>> {
     let out = runner.run(
         "git",

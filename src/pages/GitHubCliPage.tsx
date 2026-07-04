@@ -91,7 +91,7 @@ export function GitHubCliPage() {
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium">{t('credential.health')}</p>
               <p className="truncate text-xs text-default-500">
-                {t('credential.ghActive')}: {diagnosis.data.ghUser ?? '—'} ·{' '}
+                {t('credential.ghActive')}: {diagnosis.data.ghUser ?? '-'} ·{' '}
                 {t('credential.gcmStored')}:{' '}
                 {diagnosis.data.gcmUsers.length > 0
                   ? diagnosis.data.gcmUsers.join(', ')

@@ -138,7 +138,7 @@
     "toolsNone": "None detected",
     "healthUnavailable": "Could not run diagnostics.",
     "data": "Data",
-    "dataDesc": "Export your accounts, repositories, and settings — or restore them on another machine.",
+    "dataDesc": "Export your accounts, repositories, and settings, or restore them on another machine.",
     "export": "Export",
     "import": "Import",
     "importTitle": "Choose a backup file",
