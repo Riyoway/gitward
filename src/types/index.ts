@@ -39,6 +39,14 @@ export interface CredentialDiagnosis {
   mismatch: boolean;
 }
 
+/** An editable app-identity field found in a project's config files. */
+export interface IdentityField {
+  id: string;
+  label: string;
+  file: string;
+  value: string | null;
+}
+
 /** A developer tool Gitward can launch, and whether it is installed. */
 export interface Tool {
   id: string;

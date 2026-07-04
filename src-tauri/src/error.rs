@@ -24,6 +24,14 @@ pub enum AppError {
     #[error("unknown tool: {0}")]
     ToolNotFound(String),
 
+    /// A configuration file could not be parsed.
+    #[error("failed to parse {file}: {reason}")]
+    FileParse { file: String, reason: String },
+
+    /// No identity field is registered under the given id.
+    #[error("unknown identity field: {0}")]
+    UnknownField(String),
+
     /// Failed to spawn a process at all (e.g. the program is not on PATH).
     #[error("failed to run `{program}`: {source}")]
     Spawn {

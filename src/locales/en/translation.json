@@ -7,8 +7,20 @@
     "projects": "Projects",
     "gitAccounts": "Git Accounts",
     "githubCli": "GitHub CLI",
+    "appIdentity": "App Identity",
     "logs": "Logs",
     "settings": "Settings"
+  },
+  "appIdentity": {
+    "choose": "Choose project",
+    "pickTitle": "Choose a project folder",
+    "hint": "Choose a project folder to view and edit its app identity.",
+    "noFramework": "No known framework detected",
+    "noFields": "No editable identity fields found.",
+    "backupNote": "A .bak copy is written before each file is changed.",
+    "saved": "Identity updated.",
+    "saveFailed": "Could not save",
+    "loadFailed": "Could not read project"
   },
   "palette": {
     "title": "Command palette",
