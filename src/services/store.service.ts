@@ -13,6 +13,7 @@ export const StoreKey = {
   AutoSwitch: 'autoSwitch',
   Repositories: 'repositories',
   GitAccounts: 'gitAccounts',
+  Logs: 'logs',
 } as const;
 
 export const appStore = {

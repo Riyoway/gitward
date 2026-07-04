@@ -6,11 +6,13 @@ import { useTranslation } from 'react-i18next';
 import { Page } from '@/components/layout/Page';
 import { queryKeys } from '@/lib/queryKeys';
 import { githubCliService } from '@/services/githubCli.service';
+import { useLogsStore } from '@/features/logs/store';
 import type { GhAccount } from '@/types';
 
 export function GitHubCliPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const recordLog = useLogsStore((s) => s.record);
 
   const accounts = useQuery({
     queryKey: queryKeys.ghAccounts,
@@ -19,10 +21,21 @@ export function GitHubCliPage() {
 
   const switchAccount = useMutation({
     mutationFn: githubCliService.authSwitch,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.ghAccounts }),
+    onSuccess: (_data, username) => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.ghAccounts });
+      recordLog({ action: 'ghSwitch', target: username, success: true });
+    },
+    onError: (error, username) => {
+      recordLog({ action: 'ghSwitch', target: username, success: false, detail: (error as Error).message });
+    },
   });
 
-  const setupGit = useMutation({ mutationFn: githubCliService.setupGit });
+  const setupGit = useMutation({
+    mutationFn: githubCliService.setupGit,
+    onSuccess: () => recordLog({ action: 'setupGit', target: 'git', success: true }),
+    onError: (error) =>
+      recordLog({ action: 'setupGit', target: 'git', success: false, detail: (error as Error).message }),
+  });
 
   const actions = (
     <>

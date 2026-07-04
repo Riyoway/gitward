@@ -53,6 +53,17 @@
     "inSync": "同期済み",
     "sync": "同期"
   },
+  "logs": {
+    "empty": "まだ操作履歴がありません。リポジトリを Sync したりアカウントを切り替えると、ここに記録されます。",
+    "clear": "クリア",
+    "ok": "成功",
+    "failed": "失敗",
+    "action": {
+      "sync": "Sync",
+      "ghSwitch": "GitHub アカウント切替",
+      "setupGit": "git 認証情報の設定"
+    }
+  },
   "launcher": {
     "open": "開く",
     "openIn": "{{name}} で開く",

@@ -24,6 +24,7 @@ import { githubCliService } from '@/services/githubCli.service';
 import { launcherService } from '@/services/launcher.service';
 import { syncService } from '@/services/sync.service';
 import { useGitAccountsStore } from '@/features/git-accounts/store';
+import { useLogsStore } from '@/features/logs/store';
 import type { SyncReport } from '@/types';
 import { useRepositoriesStore } from '../store';
 import { identityMatches } from '../sync-status';
@@ -47,6 +48,7 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
   const queryClient = useQueryClient();
   const accounts = useGitAccountsStore((s) => s.accounts);
   const update = useRepositoriesStore((s) => s.update);
+  const recordLog = useLogsStore((s) => s.record);
 
   const status = useQuery({
     queryKey: queryKeys.repoStatus(repo.id),
@@ -82,10 +84,19 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
         repo.ghUsername,
       );
     },
-    onSuccess: () => {
+    onSuccess: (report) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.repoIdentity(repo.id) });
       void queryClient.invalidateQueries({ queryKey: queryKeys.repoStatus(repo.id) });
       void queryClient.invalidateQueries({ queryKey: queryKeys.ghAccounts });
+      recordLog({
+        action: 'sync',
+        target: repo.name,
+        success: report.overallSuccess,
+        detail: report.overallSuccess ? undefined : failureMessage(report),
+      });
+    },
+    onError: (error) => {
+      recordLog({ action: 'sync', target: repo.name, success: false, detail: (error as Error).message });
     },
   });
   const syncState =

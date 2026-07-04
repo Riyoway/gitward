@@ -8,6 +8,7 @@ import { queryClient } from '@/lib/queryClient';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useRepositoriesStore } from '@/features/repositories/store';
 import { useGitAccountsStore } from '@/features/git-accounts/store';
+import { useLogsStore } from '@/features/logs/store';
 import '@/lib/i18n';
 import '@/styles/global.css';
 
@@ -20,6 +21,7 @@ async function bootstrap() {
     useSettingsStore.getState().hydrate(),
     useRepositoriesStore.getState().hydrate(),
     useGitAccountsStore.getState().hydrate(),
+    useLogsStore.getState().hydrate(),
   ]);
 
   ReactDOM.createRoot(rootElement!).render(

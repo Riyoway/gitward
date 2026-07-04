@@ -53,6 +53,17 @@
     "inSync": "In sync",
     "sync": "Sync"
   },
+  "logs": {
+    "empty": "No activity yet. Sync a repository or switch accounts to see logs here.",
+    "clear": "Clear",
+    "ok": "OK",
+    "failed": "Failed",
+    "action": {
+      "sync": "Sync",
+      "ghSwitch": "Switch GitHub account",
+      "setupGit": "Setup git credentials"
+    }
+  },
   "launcher": {
     "open": "Open",
     "openIn": "Open in {{name}}",
