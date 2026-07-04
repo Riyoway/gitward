@@ -13,7 +13,10 @@ const herouiThemeGlob = join(
     }),
   ),
   'dist/**/*.{js,ts,jsx,tsx}',
-);
+)
+  // fast-glob (used by Tailwind's content scanner) requires forward slashes;
+  // path.join yields backslashes on Windows, which glob treats as escapes.
+  .replace(/\\/g, '/');
 
 /** @type {import('tailwindcss').Config} */
 export default {
