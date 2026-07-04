@@ -53,6 +53,12 @@
     "inSync": "In sync",
     "sync": "Sync"
   },
+  "launcher": {
+    "open": "Open",
+    "openIn": "Open in {{name}}",
+    "reveal": "Reveal in Explorer",
+    "openRemote": "Open remote"
+  },
   "githubCli": {
     "setupGit": "Sync git credentials",
     "setupGitDone": "git is now using gh for authentication.",

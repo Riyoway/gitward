@@ -18,6 +18,8 @@ pub fn run() {
             commands::github_cli::gh_auth_status,
             commands::github_cli::gh_auth_switch,
             commands::github_cli::gh_auth_setup_git,
+            commands::launcher::detect_tools,
+            commands::launcher::launch_tool,
             commands::sync::sync_repository,
         ])
         .run(tauri::generate_context!())

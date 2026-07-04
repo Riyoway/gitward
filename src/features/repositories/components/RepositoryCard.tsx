@@ -1,12 +1,27 @@
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Card, CardBody, Chip, Select, SelectItem, Spinner, Tooltip } from '@heroui/react';
-import { ArrowRightLeft, GitBranch, RefreshCw, Trash2, User } from 'lucide-react';
+import {
+  Button,
+  Card,
+  CardBody,
+  Chip,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+  Select,
+  SelectItem,
+  Spinner,
+  Tooltip,
+} from '@heroui/react';
+import { ArrowRightLeft, ChevronDown, FolderOpen, GitBranch, RefreshCw, Trash2, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { queryKeys } from '@/lib/queryKeys';
 import { firstSelectedKey } from '@/lib/selection';
 import { gitService } from '@/services/git.service';
 import { githubCliService } from '@/services/githubCli.service';
+import { launcherService } from '@/services/launcher.service';
 import { syncService } from '@/services/sync.service';
 import { useGitAccountsStore } from '@/features/git-accounts/store';
 import type { SyncReport } from '@/types';
@@ -46,6 +61,9 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
     queryKey: queryKeys.ghAccounts,
     queryFn: githubCliService.authStatus,
   });
+  const tools = useQuery({ queryKey: queryKeys.tools, queryFn: launcherService.detectTools });
+
+  const [openError, setOpenError] = useState<string | null>(null);
 
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: queryKeys.repoStatus(repo.id) });
@@ -76,6 +94,27 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
         ? 'synced'
         : 'needsSync'
       : null;
+
+  const remoteUrl = status.data?.remoteUrl ?? null;
+  const canOpenRemote = !!remoteUrl && /^https?:\/\//.test(remoteUrl);
+  const openItems = [
+    ...(tools.data ?? [])
+      .filter((tool) => tool.installed)
+      .map((tool) => ({ key: `tool:${tool.id}`, label: t('launcher.openIn', { name: tool.name }) })),
+    { key: 'reveal', label: t('launcher.reveal') },
+    ...(canOpenRemote ? [{ key: 'remote', label: t('launcher.openRemote') }] : []),
+  ];
+
+  const handleOpen = async (key: string) => {
+    setOpenError(null);
+    try {
+      if (key.startsWith('tool:')) await launcherService.launchTool(key.slice(5), repo.path);
+      else if (key === 'reveal') await launcherService.revealInExplorer(repo.path);
+      else if (key === 'remote' && remoteUrl) await launcherService.openRemote(remoteUrl);
+    } catch (e) {
+      setOpenError(e instanceof Error ? e.message : String(e));
+    }
+  };
 
   return (
     <Card shadow="sm" className="w-full">
@@ -215,11 +254,32 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
           </Select>
         </div>
 
-        <div className="flex items-center justify-between gap-3">
-          <p className="min-h-4 flex-1 text-xs text-danger">
-            {sync.isError && (sync.error as Error).message}
+        <div className="flex items-center gap-2">
+          <Dropdown>
+            <DropdownTrigger>
+              <Button
+                size="sm"
+                variant="flat"
+                startContent={<FolderOpen size={15} />}
+                endContent={<ChevronDown size={14} />}
+              >
+                {t('launcher.open')}
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              aria-label={t('launcher.open')}
+              items={openItems}
+              onAction={(key) => void handleOpen(String(key))}
+            >
+              {(item) => <DropdownItem key={item.key}>{item.label}</DropdownItem>}
+            </DropdownMenu>
+          </Dropdown>
+
+          <p className="min-h-4 flex-1 truncate text-xs text-danger">
+            {openError ?? (sync.isError ? (sync.error as Error).message : '')}
             {sync.data && !sync.data.overallSuccess && failureMessage(sync.data)}
           </p>
+
           <Button
             size="sm"
             color="primary"

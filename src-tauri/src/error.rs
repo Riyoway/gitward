@@ -20,6 +20,10 @@ pub enum AppError {
     #[error("not a git repository: {0}")]
     NotAGitRepo(String),
 
+    /// No launcher tool is registered under the given id.
+    #[error("unknown tool: {0}")]
+    ToolNotFound(String),
+
     /// Failed to spawn a process at all (e.g. the program is not on PATH).
     #[error("failed to run `{program}`: {source}")]
     Spawn {

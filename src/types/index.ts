@@ -32,6 +32,14 @@ export interface GhAccount {
   scopes: string[];
 }
 
+/** A developer tool Gitward can launch, and whether it is installed. */
+export interface Tool {
+  id: string;
+  name: string;
+  category: string;
+  installed: boolean;
+}
+
 /** One step of a sync operation. */
 export interface SyncStep {
   name: string;

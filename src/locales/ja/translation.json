@@ -53,6 +53,12 @@
     "inSync": "同期済み",
     "sync": "同期"
   },
+  "launcher": {
+    "open": "開く",
+    "openIn": "{{name}} で開く",
+    "reveal": "エクスプローラーで表示",
+    "openRemote": "リモートを開く"
+  },
   "githubCli": {
     "setupGit": "git 認証情報を同期",
     "setupGitDone": "git が gh を認証に使うよう設定しました。",
