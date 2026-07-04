@@ -8,6 +8,7 @@ import {
   Dropdown,
   DropdownItem,
   DropdownMenu,
+  DropdownSection,
   DropdownTrigger,
   Select,
   SelectItem,
@@ -116,13 +117,8 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
 
   const remoteUrl = status.data?.remoteUrl ?? null;
   const canOpenRemote = !!remoteUrl && /^https?:\/\//.test(remoteUrl);
-  const openItems = [
-    ...(tools.data ?? [])
-      .filter((tool) => tool.installed)
-      .map((tool) => ({ key: `tool:${tool.id}`, label: t('launcher.openIn', { name: tool.name }) })),
-    { key: 'reveal', label: t('launcher.reveal') },
-    ...(canOpenRemote ? [{ key: 'remote', label: t('launcher.openRemote') }] : []),
-  ];
+  const installedTools = (tools.data ?? []).filter((tool) => tool.installed);
+  const TOOL_CATEGORIES = ['editor', 'terminal', 'ai'] as const;
 
   const handleOpen = async (key: string) => {
     setOpenError(null);
@@ -308,10 +304,29 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
             </DropdownTrigger>
             <DropdownMenu
               aria-label={t('launcher.open')}
-              items={openItems}
               onAction={(key) => void handleOpen(String(key))}
             >
-              {(item) => <DropdownItem key={item.key}>{item.label}</DropdownItem>}
+              {[
+                ...TOOL_CATEGORIES.filter(
+                  (cat) => installedTools.some((tool) => tool.category === cat),
+                ).map((cat) => (
+                  <DropdownSection key={cat} title={t(`launcher.category.${cat}`)} showDivider>
+                    {installedTools
+                      .filter((tool) => tool.category === cat)
+                      .map((tool) => (
+                        <DropdownItem key={`tool:${tool.id}`}>{tool.name}</DropdownItem>
+                      ))}
+                  </DropdownSection>
+                )),
+                <DropdownSection key="repo" title={t('launcher.repoActions')}>
+                  {[
+                    <DropdownItem key="reveal">{t('launcher.reveal')}</DropdownItem>,
+                    ...(canOpenRemote
+                      ? [<DropdownItem key="remote">{t('launcher.openRemote')}</DropdownItem>]
+                      : []),
+                  ]}
+                </DropdownSection>,
+              ]}
             </DropdownMenu>
           </Dropdown>
 

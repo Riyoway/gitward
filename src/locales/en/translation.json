@@ -100,7 +100,13 @@
     "open": "Open",
     "openIn": "Open in {{name}}",
     "reveal": "Reveal in Explorer",
-    "openRemote": "Open remote"
+    "openRemote": "Open remote",
+    "repoActions": "This repository",
+    "category": {
+      "editor": "Editors",
+      "terminal": "Terminals",
+      "ai": "AI tools"
+    }
   },
   "githubCli": {
     "setupGit": "Sync git credentials",

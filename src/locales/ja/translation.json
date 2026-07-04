@@ -100,7 +100,13 @@
     "open": "開く",
     "openIn": "{{name}} で開く",
     "reveal": "エクスプローラーで表示",
-    "openRemote": "リモートを開く"
+    "openRemote": "リモートを開く",
+    "repoActions": "このリポジトリ",
+    "category": {
+      "editor": "エディタ",
+      "terminal": "ターミナル",
+      "ai": "AI ツール"
+    }
   },
   "githubCli": {
     "setupGit": "git 認証情報を同期",
