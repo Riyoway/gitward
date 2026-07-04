@@ -10,6 +10,16 @@
     "logs": "ログ",
     "settings": "設定"
   },
+  "palette": {
+    "title": "コマンドパレット",
+    "placeholder": "コマンド・ページ・リポジトリを検索…",
+    "navigate": "移動",
+    "actions": "アクション",
+    "repositories": "リポジトリ",
+    "cycleTheme": "テーマを切り替え",
+    "toggleLanguage": "言語を切り替え",
+    "noResults": "結果がありません"
+  },
   "common": {
     "add": "追加",
     "cancel": "キャンセル",

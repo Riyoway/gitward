@@ -10,6 +10,16 @@
     "logs": "Logs",
     "settings": "Settings"
   },
+  "palette": {
+    "title": "Command palette",
+    "placeholder": "Search commands, pages, repositories…",
+    "navigate": "Navigate",
+    "actions": "Actions",
+    "repositories": "Repositories",
+    "cycleTheme": "Cycle theme",
+    "toggleLanguage": "Toggle language",
+    "noResults": "No results"
+  },
   "common": {
     "add": "Add",
     "cancel": "Cancel",
