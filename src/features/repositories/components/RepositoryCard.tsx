@@ -371,6 +371,7 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
             <DropdownMenu
               aria-label={t('launcher.open')}
               onAction={(key) => void handleOpen(String(key))}
+              className="max-h-[60vh] overflow-y-auto"
             >
               {[
                 ...TOOL_CATEGORIES.filter(
