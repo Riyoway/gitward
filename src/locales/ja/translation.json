@@ -7,14 +7,11 @@
     "projects": "プロジェクト",
     "gitAccounts": "Git アカウント",
     "githubCli": "GitHub CLI",
-    "appIdentity": "アプリ ID",
     "logs": "ログ",
     "settings": "設定"
   },
   "appIdentity": {
-    "choose": "プロジェクトを選択",
-    "pickTitle": "プロジェクトのフォルダを選択",
-    "hint": "プロジェクトのフォルダを選ぶと、アプリの識別情報を表示・編集できます。",
+    "title": "アプリ ID",
     "noFramework": "既知のフレームワークが見つかりません",
     "noFields": "編集可能な識別フィールドが見つかりません。",
     "backupNote": "各ファイルは変更前に .bak として複製されます。",

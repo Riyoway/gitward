@@ -6,4 +6,5 @@ export const queryKeys = {
   credentialDiagnosis: ['credential-diagnosis'] as const,
   tools: ['tools'] as const,
   health: ['health'] as const,
+  appIdentity: (path: string) => ['app-identity', path] as const,
 };

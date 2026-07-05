@@ -14,8 +14,19 @@ import {
   SelectItem,
   Spinner,
   Tooltip,
+  useDisclosure,
 } from '@heroui/react';
-import { ArrowRightLeft, ChevronDown, FolderOpen, GitBranch, RefreshCw, Star, Trash2, User } from 'lucide-react';
+import {
+  ArrowRightLeft,
+  ChevronDown,
+  Fingerprint,
+  FolderOpen,
+  GitBranch,
+  RefreshCw,
+  Star,
+  Trash2,
+  User,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { queryKeys } from '@/lib/queryKeys';
@@ -25,6 +36,7 @@ import { gitService } from '@/services/git.service';
 import { githubCliService } from '@/services/githubCli.service';
 import { launcherService } from '@/services/launcher.service';
 import { syncService } from '@/services/sync.service';
+import { AppIdentityModal } from '@/features/app-identity/components/AppIdentityModal';
 import { useGitAccountsStore } from '@/features/git-accounts/store';
 import { useLogsStore } from '@/features/logs/store';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -72,6 +84,7 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
   const tools = useQuery({ queryKey: queryKeys.tools, queryFn: launcherService.detectTools });
 
   const [openError, setOpenError] = useState<string | null>(null);
+  const identityModal = useDisclosure();
 
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: queryKeys.repoStatus(repo.id) });
@@ -138,8 +151,14 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
   };
 
   return (
-    <Card shadow="sm" className="w-full">
-      <CardBody className="gap-3 p-5">
+    <>
+      <AppIdentityModal
+        repo={repo}
+        isOpen={identityModal.isOpen}
+        onOpenChange={identityModal.onOpenChange}
+      />
+      <Card shadow="sm" className="w-full">
+        <CardBody className="gap-3 p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h3 className="truncate font-medium">{repo.name}</h3>
@@ -148,6 +167,17 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-1">
+            <Tooltip content={t('appIdentity.title')} closeDelay={0}>
+              <Button
+                isIconOnly
+                size="sm"
+                variant="light"
+                aria-label={t('appIdentity.title')}
+                onPress={identityModal.onOpen}
+              >
+                <Fingerprint size={15} />
+              </Button>
+            </Tooltip>
             <Tooltip content={t('repository.favorite')} closeDelay={0}>
               <Button
                 isIconOnly
@@ -347,6 +377,7 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
           </Button>
         </div>
       </CardBody>
-    </Card>
+      </Card>
+    </>
   );
 }
