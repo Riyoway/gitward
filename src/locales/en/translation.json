@@ -81,10 +81,7 @@
     "noMatches": "No repositories match your filters.",
     "syncDone": "Synced {{name}}",
     "syncFailed": "Sync failed",
-    "icon": "Icon",
-    "setIcon": "Set icon…",
-    "changeIcon": "Change icon…",
-    "removeIcon": "Remove icon",
+    "setIcon": "Set icon",
     "iconFailed": "Could not set icon"
   },
   "logs": {

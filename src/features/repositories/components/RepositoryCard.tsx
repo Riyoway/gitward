@@ -196,43 +196,22 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
         <CardBody className="gap-3 p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-3">
-            <Dropdown>
-              <DropdownTrigger>
-                <button
-                  type="button"
-                  aria-label={t('repository.icon')}
-                  className="mt-0.5 shrink-0 overflow-hidden rounded-medium transition-opacity hover:opacity-80"
-                >
-                  {repo.icon ? (
-                    <img src={repo.icon} alt="" className="h-9 w-9 rounded-medium object-cover" />
-                  ) : (
-                    <span className="flex h-9 w-9 items-center justify-center rounded-medium bg-default-100 text-default-400">
-                      <ImagePlus size={16} />
-                    </span>
-                  )}
-                </button>
-              </DropdownTrigger>
-              <DropdownMenu
-                aria-label={t('repository.icon')}
-                onAction={(key) => {
-                  if (key === 'set') void chooseIcon();
-                  else if (key === 'remove') update(repo.id, { icon: undefined });
-                }}
+            <Tooltip content={t('repository.setIcon')} closeDelay={0}>
+              <button
+                type="button"
+                aria-label={t('repository.setIcon')}
+                onClick={() => void chooseIcon()}
+                className="mt-0.5 shrink-0 overflow-hidden rounded-medium transition-opacity hover:opacity-80"
               >
-                {[
-                  <DropdownItem key="set">
-                    {repo.icon ? t('repository.changeIcon') : t('repository.setIcon')}
-                  </DropdownItem>,
-                  ...(repo.icon
-                    ? [
-                        <DropdownItem key="remove" className="text-danger" color="danger">
-                          {t('repository.removeIcon')}
-                        </DropdownItem>,
-                      ]
-                    : []),
-                ]}
-              </DropdownMenu>
-            </Dropdown>
+                {repo.icon ? (
+                  <img src={repo.icon} alt="" className="h-9 w-9 rounded-medium object-cover" />
+                ) : (
+                  <span className="flex h-9 w-9 items-center justify-center rounded-medium bg-default-100 text-default-400">
+                    <ImagePlus size={16} />
+                  </span>
+                )}
+              </button>
+            </Tooltip>
             <div className="min-w-0">
               <h3 className="truncate font-medium">{repo.name}</h3>
               <p className="truncate font-mono text-xs text-default-400" title={repo.path}>
@@ -374,13 +353,30 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
               const id = firstSelectedKey(keys);
               if (id) update(repo.id, { gitAccountId: id });
             }}
+            renderValue={(items) =>
+              items.map((item) => {
+                const account = accounts.find((a) => a.id === item.key);
+                return (
+                  <span key={item.key} className="flex items-center gap-2">
+                    {account && (
+                      <span
+                        className="h-3 w-3 shrink-0 rounded-full"
+                        style={{ backgroundColor: account.color }}
+                      />
+                    )}
+                    <span className="truncate">{account?.label ?? item.textValue}</span>
+                  </span>
+                );
+              })
+            }
           >
             {accounts.map((account) => (
               <SelectItem
                 key={account.id}
+                textValue={account.label}
                 startContent={
                   <span
-                    className="h-3 w-3 rounded-full"
+                    className="h-3 w-3 shrink-0 rounded-full"
                     style={{ backgroundColor: account.color }}
                   />
                 }

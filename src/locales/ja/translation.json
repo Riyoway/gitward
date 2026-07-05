@@ -81,10 +81,7 @@
     "noMatches": "条件に一致するリポジトリがありません。",
     "syncDone": "{{name}} を同期しました",
     "syncFailed": "同期に失敗しました",
-    "icon": "アイコン",
-    "setIcon": "アイコンを設定…",
-    "changeIcon": "アイコンを変更…",
-    "removeIcon": "アイコンを削除",
+    "setIcon": "アイコンを設定",
     "iconFailed": "アイコンを設定できませんでした"
   },
   "logs": {
