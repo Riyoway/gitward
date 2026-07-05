@@ -371,6 +371,36 @@ const TOOLS: &[ToolDef] = &[
         launch_args: &["--cd={path}"],
     },
     ToolDef {
+        id: "powershell",
+        name: "Windows PowerShell",
+        category: "terminal",
+        commands: &["powershell"],
+        mac_app: None,
+        platforms: &[Os::Windows],
+        launch_kind: LaunchKind::Spawn,
+        launch_args: &[],
+    },
+    ToolDef {
+        id: "pwsh",
+        name: "PowerShell",
+        category: "terminal",
+        commands: &["pwsh"],
+        mac_app: None,
+        platforms: &[Os::Windows],
+        launch_kind: LaunchKind::Spawn,
+        launch_args: &[],
+    },
+    ToolDef {
+        id: "cmd",
+        name: "Command Prompt",
+        category: "terminal",
+        commands: &["cmd"],
+        mac_app: None,
+        platforms: &[Os::Windows],
+        launch_kind: LaunchKind::Spawn,
+        launch_args: &[],
+    },
+    ToolDef {
         id: "iterm2",
         name: "iTerm2",
         category: "terminal",
@@ -742,18 +772,31 @@ pub struct Invocation {
     pub cwd: Option<String>,
 }
 
-/// Detect which known tools (relevant to this OS) are installed.
+/// Detect which known tools (relevant to this OS) are installed. Each tool is
+/// probed on its own thread so ~dozens of PATH lookups finish in parallel
+/// instead of serially.
 pub fn detect_tools(runner: &dyn CommandRunner) -> Vec<Tool> {
-    TOOLS
+    let relevant: Vec<&ToolDef> = TOOLS
         .iter()
         .filter(|t| t.platforms.contains(&CURRENT_OS))
-        .map(|t| Tool {
-            id: t.id.to_string(),
-            name: t.name.to_string(),
-            category: t.category.to_string(),
-            installed: is_installed(runner, t),
-        })
-        .collect()
+        .collect();
+
+    std::thread::scope(|scope| {
+        relevant
+            .iter()
+            .map(|&tool| {
+                scope.spawn(move || Tool {
+                    id: tool.id.to_string(),
+                    name: tool.name.to_string(),
+                    category: tool.category.to_string(),
+                    installed: is_installed(runner, tool),
+                })
+            })
+            .collect::<Vec<_>>()
+            .into_iter()
+            .map(|handle| handle.join().expect("tool detection thread panicked"))
+            .collect()
+    })
 }
 
 fn is_installed(runner: &dyn CommandRunner, tool: &ToolDef) -> bool {
@@ -886,6 +929,23 @@ fn build_spawn(tool: &ToolDef, path: &str) -> Invocation {
                 cwd: None,
             };
         }
+    }
+    // Console shells have no window of their own; `start` gives them one at the
+    // repo (the new window inherits this cwd). GUI apps/terminals below create
+    // their own window from a hidden `cmd /C`.
+    if matches!(tool.id, "cmd" | "powershell" | "pwsh") {
+        let mut args = vec![
+            "/C".to_string(),
+            "start".to_string(),
+            String::new(), // empty window title
+            first_command(tool).to_string(),
+        ];
+        args.extend(substitute(tool.launch_args, path));
+        return Invocation {
+            program: "cmd".into(),
+            args,
+            cwd: Some(path.to_string()),
+        };
     }
     // `cmd /C <program> <args>` so PATH `.cmd` shims (code.cmd, idea.cmd) and the
     // `wt` alias resolve. The console is hidden by the caller's CREATE_NO_WINDOW.

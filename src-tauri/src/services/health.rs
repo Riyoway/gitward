@@ -6,7 +6,6 @@ use std::time::Duration;
 use serde::Serialize;
 
 use crate::services::command::CommandRunner;
-use crate::services::launcher::{self, Tool};
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -15,18 +14,18 @@ pub struct HealthReport {
     pub gh: bool,
     pub ssh: bool,
     pub internet: bool,
-    pub tools: Vec<Tool>,
 }
 
 /// Probe the local environment. Network reachability is checked with a short
-/// TCP connect to github.com so an offline machine reports quickly.
+/// TCP connect to github.com so an offline machine reports quickly. Tool
+/// detection is a separate command so the UI can show it without waiting on the
+/// network probe.
 pub fn check(runner: &dyn CommandRunner) -> HealthReport {
     HealthReport {
         git: version_ok(runner, "git"),
         gh: version_ok(runner, "gh"),
         ssh: version_ok(runner, "ssh"),
         internet: internet_reachable(),
-        tools: launcher::detect_tools(runner),
     }
 }
 

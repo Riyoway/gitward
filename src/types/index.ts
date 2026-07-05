@@ -61,7 +61,6 @@ export interface HealthReport {
   gh: boolean;
   ssh: boolean;
   internet: boolean;
-  tools: Tool[];
 }
 
 /** One step of a sync operation. */

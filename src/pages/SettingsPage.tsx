@@ -13,6 +13,7 @@ import { applyBackup, buildBackup, parseBackup } from '@/features/backup/backup'
 import { pickJsonFile, pickSavePath } from '@/services/dialog.service';
 import { fsService } from '@/services/fs.service';
 import { healthService } from '@/services/health.service';
+import { launcherService } from '@/services/launcher.service';
 import { useSettingsStore } from '@/stores/settingsStore';
 
 function HealthRow({ label, ok }: { label: string; ok: boolean }) {
@@ -39,7 +40,10 @@ export function SettingsPage() {
   const { theme, language, autoSwitch, terminalId, setTheme, setLanguage, setAutoSwitch, setTerminalId } =
     useSettingsStore();
   const health = useQuery({ queryKey: queryKeys.health, queryFn: healthService.check });
-  const installedTools = (health.data?.tools ?? []).filter((tool) => tool.installed);
+  // Separate from health so the tool/terminal lists show without waiting on the
+  // network probe inside the health check.
+  const tools = useQuery({ queryKey: queryKeys.tools, queryFn: launcherService.detectTools });
+  const installedTools = (tools.data ?? []).filter((tool) => tool.installed);
   const installedTerminals = installedTools.filter((tool) => tool.category === 'terminal');
 
   async function handleExport() {
