@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Button, Input, Select, SelectItem, Switch } from '@heroui/react';
-import { FolderPlus, Search } from 'lucide-react';
+import { Button, ButtonGroup, Input, Select, SelectItem, Switch, Tooltip } from '@heroui/react';
+import { FolderPlus, LayoutGrid, List, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Page } from '@/components/layout/Page';
@@ -10,6 +10,7 @@ import { filterAndSortRepos, type RepoSort } from '@/features/repositories/filte
 import { deriveRepoName } from '@/features/repositories/naming';
 import { useRepositoriesStore } from '@/features/repositories/store';
 import { useGitAccountsStore } from '@/features/git-accounts/store';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { useUiStore } from '@/stores/uiStore';
 import { pickDirectory } from '@/services/dialog.service';
 import { gitService } from '@/services/git.service';
@@ -20,6 +21,8 @@ export function ProjectsPage() {
   const add = useRepositoriesStore((s) => s.add);
   const remove = useRepositoriesStore((s) => s.remove);
   const accounts = useGitAccountsStore((s) => s.accounts);
+  const viewMode = useSettingsStore((s) => s.viewMode);
+  const setViewMode = useSettingsStore((s) => s.setViewMode);
   const ui = useUiStore();
 
   const [error, setError] = useState<string | null>(null);
@@ -121,12 +124,41 @@ export function ProjectsPage() {
             <Switch size="sm" isSelected={ui.favoritesOnly} onValueChange={ui.setFavoritesOnly}>
               <span className="text-sm">{t('repository.favoritesOnly')}</span>
             </Switch>
+
+            <ButtonGroup size="sm" variant="flat" className="ml-auto">
+              <Tooltip content={t('repository.gridView')} closeDelay={0}>
+                <Button
+                  isIconOnly
+                  aria-label={t('repository.gridView')}
+                  color={viewMode === 'grid' ? 'primary' : 'default'}
+                  onPress={() => setViewMode('grid')}
+                >
+                  <LayoutGrid size={16} />
+                </Button>
+              </Tooltip>
+              <Tooltip content={t('repository.listView')} closeDelay={0}>
+                <Button
+                  isIconOnly
+                  aria-label={t('repository.listView')}
+                  color={viewMode === 'list' ? 'primary' : 'default'}
+                  onPress={() => setViewMode('list')}
+                >
+                  <List size={16} />
+                </Button>
+              </Tooltip>
+            </ButtonGroup>
           </div>
 
           {visible.length === 0 ? (
             <p className="text-sm text-default-500">{t('repository.noMatches')}</p>
           ) : (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div
+              className={
+                viewMode === 'grid'
+                  ? 'grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3'
+                  : 'flex flex-col gap-3'
+              }
+            >
               {visible.map((repo) => (
                 <RepositoryCard key={repo.id} repo={repo} onRemove={remove} />
               ))}

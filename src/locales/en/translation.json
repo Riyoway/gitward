@@ -78,6 +78,8 @@
     "filterByAccount": "Filter by account",
     "allAccounts": "All accounts",
     "favoritesOnly": "Favorites",
+    "gridView": "Grid view",
+    "listView": "List view",
     "noMatches": "No repositories match your filters.",
     "syncDone": "Synced {{name}}",
     "syncFailed": "Sync failed",

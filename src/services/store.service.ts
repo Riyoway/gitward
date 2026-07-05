@@ -12,6 +12,7 @@ export const StoreKey = {
   Language: 'language',
   AutoSwitch: 'autoSwitch',
   TerminalId: 'terminalId',
+  ViewMode: 'viewMode',
   Repositories: 'repositories',
   GitAccounts: 'gitAccounts',
   Logs: 'logs',
