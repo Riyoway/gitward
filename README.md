@@ -1,6 +1,10 @@
-# Gitward
+<p align="center">
+  <img src="assets/icon.png" alt="Gitward" width="120" height="120" />
+</p>
 
-**Keep the right identity on every repository.**
+<h1 align="center">Gitward</h1>
+
+<p align="center"><strong>Keep the right identity on every repository.</strong></p>
 
 Gitward is a desktop workspace manager for people who juggle multiple Git
 identities. Work and personal accounts, a client's org, an alt for open source:
