@@ -13,12 +13,19 @@ pub async fn detect_tools() -> CommandResult<Vec<Tool>> {
 }
 
 #[tauri::command]
-pub async fn launch_tool(tool_id: String, path: String) -> CommandResult<()> {
-    run_blocking(move || CommandResult::from_result(spawn_tool(&tool_id, &path))).await
+pub async fn launch_tool(
+    tool_id: String,
+    path: String,
+    terminal_id: Option<String>,
+) -> CommandResult<()> {
+    run_blocking(move || {
+        CommandResult::from_result(spawn_tool(&tool_id, &path, terminal_id.as_deref()))
+    })
+    .await
 }
 
-fn spawn_tool(tool_id: &str, path: &str) -> AppResult<()> {
-    let inv = launcher::resolve_launch(tool_id, path)?;
+fn spawn_tool(tool_id: &str, path: &str, terminal_id: Option<&str>) -> AppResult<()> {
+    let inv = launcher::resolve_launch(tool_id, path, terminal_id)?;
 
     let mut cmd = Command::new(&inv.program);
     cmd.args(&inv.args);

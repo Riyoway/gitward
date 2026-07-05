@@ -11,6 +11,7 @@ export const StoreKey = {
   Theme: 'theme',
   Language: 'language',
   AutoSwitch: 'autoSwitch',
+  TerminalId: 'terminalId',
   Repositories: 'repositories',
   GitAccounts: 'gitAccounts',
   Logs: 'logs',

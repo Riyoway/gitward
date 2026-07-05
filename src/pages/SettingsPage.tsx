@@ -36,9 +36,11 @@ const LANGUAGES: { key: Language; label: string }[] = [
 
 export function SettingsPage() {
   const { t } = useTranslation();
-  const { theme, language, autoSwitch, setTheme, setLanguage, setAutoSwitch } = useSettingsStore();
+  const { theme, language, autoSwitch, terminalId, setTheme, setLanguage, setAutoSwitch, setTerminalId } =
+    useSettingsStore();
   const health = useQuery({ queryKey: queryKeys.health, queryFn: healthService.check });
   const installedTools = (health.data?.tools ?? []).filter((tool) => tool.installed);
+  const installedTerminals = installedTools.filter((tool) => tool.category === 'terminal');
 
   async function handleExport() {
     try {
@@ -105,14 +107,30 @@ export function SettingsPage() {
       </Card>
 
       <Card shadow="sm">
-        <CardBody className="p-6">
-          <h2 className="mb-4 text-sm font-medium text-default-500">{t('settings.behavior')}</h2>
+        <CardBody className="gap-5 p-6">
+          <h2 className="text-sm font-medium text-default-500">{t('settings.behavior')}</h2>
           <Switch isSelected={autoSwitch} onValueChange={setAutoSwitch}>
             <div className="flex flex-col">
               <span className="text-sm">{t('settings.autoSwitch')}</span>
               <span className="text-xs text-default-400">{t('settings.autoSwitchDesc')}</span>
             </div>
           </Switch>
+
+          <Select
+            label={t('settings.terminal')}
+            description={t('settings.terminalDesc')}
+            selectedKeys={[terminalId || 'default']}
+            onSelectionChange={(keys) => {
+              const value = firstSelectedKey<string>(keys);
+              setTerminalId(value === 'default' ? '' : (value ?? ''));
+            }}
+            className="max-w-xs"
+          >
+            {[
+              <SelectItem key="default">{t('settings.terminalDefault')}</SelectItem>,
+              ...installedTerminals.map((term) => <SelectItem key={term.id}>{term.name}</SelectItem>),
+            ]}
+          </Select>
         </CardBody>
       </Card>
 
@@ -127,7 +145,7 @@ export function SettingsPage() {
               aria-label={t('common.refresh')}
               onPress={() => health.refetch()}
             >
-              <RefreshCw size={15} />
+              <RefreshCw size={15} className={health.isFetching ? 'animate-spin' : ''} />
             </Button>
           </div>
 

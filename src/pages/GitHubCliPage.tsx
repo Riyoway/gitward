@@ -68,7 +68,10 @@ export function GitHubCliPage() {
         {t('githubCli.setupGit')}
       </Button>
       <Button isIconOnly variant="light" aria-label={t('common.refresh')} onPress={refreshGh}>
-        <RefreshCw size={16} />
+        <RefreshCw
+          size={16}
+          className={accounts.isFetching || diagnosis.isFetching ? 'animate-spin' : ''}
+        />
       </Button>
     </>
   );

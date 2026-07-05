@@ -22,6 +22,7 @@ import {
   Fingerprint,
   FolderOpen,
   GitBranch,
+  Package,
   RefreshCw,
   Star,
   Trash2,
@@ -34,13 +35,14 @@ import { firstSelectedKey } from '@/lib/selection';
 import { toastError, toastSuccess } from '@/lib/toast';
 import { gitService } from '@/services/git.service';
 import { githubCliService } from '@/services/githubCli.service';
+import { identityService } from '@/services/identity.service';
 import { launcherService } from '@/services/launcher.service';
 import { syncService } from '@/services/sync.service';
 import { AppIdentityModal } from '@/features/app-identity/components/AppIdentityModal';
 import { useGitAccountsStore } from '@/features/git-accounts/store';
 import { useLogsStore } from '@/features/logs/store';
 import { useSettingsStore } from '@/stores/settingsStore';
-import type { SyncReport } from '@/types';
+import type { IdentityField, SyncReport } from '@/types';
 import { useRepositoriesStore } from '../store';
 import { identityMatches } from '../sync-status';
 import type { Repository } from '../types';
@@ -51,6 +53,16 @@ function failureMessage(report: SyncReport): string {
   if (!failed) return '';
   const detail = failed.stderr.trim() || failed.stdout.trim();
   return detail ? `${failed.name}: ${detail}` : failed.name;
+}
+
+/** The app's display name from its identity fields, if any. */
+function appDisplayName(fields: IdentityField[]): string | null {
+  const preferred = ['tauri.productName', 'node.name', 'flutter.name', 'electron.productName'];
+  for (const id of preferred) {
+    const value = fields.find((f) => f.id === id)?.value;
+    if (value) return value;
+  }
+  return fields.find((f) => f.value)?.value ?? null;
 }
 
 interface RepositoryCardProps {
@@ -67,6 +79,7 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
   const markOpened = useRepositoriesStore((s) => s.markOpened);
   const recordLog = useLogsStore((s) => s.record);
   const autoSwitch = useSettingsStore((s) => s.autoSwitch);
+  const terminalId = useSettingsStore((s) => s.terminalId);
 
   const status = useQuery({
     queryKey: queryKeys.repoStatus(repo.id),
@@ -82,6 +95,13 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
     queryFn: githubCliService.authStatus,
   });
   const tools = useQuery({ queryKey: queryKeys.tools, queryFn: launcherService.detectTools });
+  const appIdentity = useQuery({
+    queryKey: queryKeys.appIdentity(repo.path),
+    queryFn: async () => ({
+      frameworks: await identityService.detect(repo.path),
+      fields: await identityService.read(repo.path),
+    }),
+  });
 
   const [openError, setOpenError] = useState<string | null>(null);
   const identityModal = useDisclosure();
@@ -89,7 +109,9 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: queryKeys.repoStatus(repo.id) });
     void queryClient.invalidateQueries({ queryKey: queryKeys.repoIdentity(repo.id) });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.appIdentity(repo.path) });
   };
+  const refreshing = status.isFetching || identity.isFetching || appIdentity.isFetching;
 
   const assignedAccount = accounts.find((a) => a.id === repo.gitAccountId);
 
@@ -141,7 +163,7 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
         if (autoSwitch && assignedAccount && syncState === 'needsSync') {
           await sync.mutateAsync();
         }
-        await launcherService.launchTool(key.slice(5), repo.path);
+        await launcherService.launchTool(key.slice(5), repo.path, terminalId);
         markOpened(repo.id);
       } else if (key === 'reveal') await launcherService.revealInExplorer(repo.path);
       else if (key === 'remote' && remoteUrl) await launcherService.openRemote(remoteUrl);
@@ -201,7 +223,7 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
                 aria-label={t('common.refresh')}
                 onPress={refresh}
               >
-                <RefreshCw size={15} />
+                <RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} />
               </Button>
             </Tooltip>
             <Tooltip content={t('common.delete')} closeDelay={0}>
@@ -273,6 +295,20 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
             <span className="text-default-400">{t('common.loading')}</span>
           )}
         </div>
+
+        {appIdentity.data &&
+          (appIdentity.data.frameworks.length > 0 ||
+            appDisplayName(appIdentity.data.fields) !== null) && (
+            <div className="flex items-center gap-2 text-xs text-default-500">
+              <Package size={13} className="shrink-0" />
+              {appIdentity.data.frameworks[0] && (
+                <Chip size="sm" variant="flat">
+                  {appIdentity.data.frameworks[0]}
+                </Chip>
+              )}
+              <span className="truncate">{appDisplayName(appIdentity.data.fields) ?? ''}</span>
+            </div>
+          )}
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           <Select

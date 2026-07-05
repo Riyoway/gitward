@@ -774,12 +774,30 @@ fn is_installed(runner: &dyn CommandRunner, tool: &ToolDef) -> bool {
 }
 
 /// Build the launch invocation for a tool, substituting the repo path.
-pub fn resolve_launch(tool_id: &str, path: &str) -> AppResult<Invocation> {
+pub fn resolve_launch(
+    tool_id: &str,
+    path: &str,
+    terminal_id: Option<&str>,
+) -> AppResult<Invocation> {
     let tool = TOOLS
         .iter()
         .find(|t| t.id == tool_id)
         .ok_or_else(|| AppError::ToolNotFound(tool_id.to_string()))?;
-    Ok(build_invocation(tool, path))
+    Ok(match tool.launch_kind {
+        LaunchKind::Spawn => build_spawn(tool, path),
+        // AI tools run inside a terminal: open the user's chosen terminal at the
+        // repo, or the OS default terminal when none is configured.
+        LaunchKind::InTerminal => match terminal_id.and_then(find_terminal) {
+            Some(term) => build_spawn(term, path),
+            None => default_terminal(path),
+        },
+    })
+}
+
+fn find_terminal(id: &str) -> Option<&'static ToolDef> {
+    TOOLS
+        .iter()
+        .find(|t| t.id == id && t.category == "terminal")
 }
 
 fn substitute(args: &[&str], path: &str) -> Vec<String> {
@@ -852,115 +870,89 @@ fn git_bash_path() -> Option<String> {
 }
 
 // --- Launch: per-OS composition -------------------------------------------
+//
+// `build_spawn` launches a GUI app or opens a terminal at the repo (both use
+// launch_args with {path}). `default_terminal` opens the OS default terminal at
+// the repo when the user has not chosen a preferred one. AI tools open a
+// terminal at the repo (chosen or default); the CLI is on PATH there.
 
 #[cfg(target_os = "windows")]
-fn build_invocation(tool: &ToolDef, path: &str) -> Invocation {
-    match tool.launch_kind {
-        LaunchKind::Spawn => {
-            if tool.id == "git-bash" {
-                if let Some(exe) = git_bash_path() {
-                    return Invocation {
-                        program: exe,
-                        args: substitute(tool.launch_args, path),
-                        cwd: None,
-                    };
-                }
-            }
-            // Run via `cmd /C <program> <args>` so PATH `.cmd` shims (code.cmd,
-            // idea.cmd) and the `wt` alias resolve. The console is hidden by the
-            // caller's CREATE_NO_WINDOW flag.
-            let mut args = vec!["/C".to_string(), first_command(tool).to_string()];
-            args.extend(substitute(tool.launch_args, path));
-            Invocation {
-                program: "cmd".into(),
-                args,
+fn build_spawn(tool: &ToolDef, path: &str) -> Invocation {
+    if tool.id == "git-bash" {
+        if let Some(exe) = git_bash_path() {
+            return Invocation {
+                program: exe,
+                args: substitute(tool.launch_args, path),
                 cwd: None,
-            }
+            };
         }
-        LaunchKind::InTerminal => {
-            // Open a new console at the repo (inherited cwd), run the CLI, keep open.
-            Invocation {
-                program: "cmd".into(),
-                args: vec![
-                    "/C".into(),
-                    "start".into(),
-                    String::new(), // empty window title
-                    "cmd".into(),
-                    "/K".into(),
-                    first_command(tool).to_string(),
-                ],
-                cwd: Some(path.to_string()),
-            }
+    }
+    // `cmd /C <program> <args>` so PATH `.cmd` shims (code.cmd, idea.cmd) and the
+    // `wt` alias resolve. The console is hidden by the caller's CREATE_NO_WINDOW.
+    let mut args = vec!["/C".to_string(), first_command(tool).to_string()];
+    args.extend(substitute(tool.launch_args, path));
+    Invocation {
+        program: "cmd".into(),
+        args,
+        cwd: None,
+    }
+}
+
+#[cfg(target_os = "windows")]
+fn default_terminal(path: &str) -> Invocation {
+    // Open a plain console at the repo (new window inherits this cwd).
+    Invocation {
+        program: "cmd".into(),
+        args: vec!["/C".into(), "start".into(), String::new(), "cmd".into()],
+        cwd: Some(path.to_string()),
+    }
+}
+
+#[cfg(target_os = "macos")]
+fn build_spawn(tool: &ToolDef, path: &str) -> Invocation {
+    if let Some(app) = tool.mac_app {
+        // `open -a "<App>" <path>` opens GUI apps and terminals at the folder
+        // without needing a CLI on PATH.
+        Invocation {
+            program: "open".into(),
+            args: vec!["-a".into(), app.into(), path.into()],
+            cwd: None,
+        }
+    } else {
+        Invocation {
+            program: first_command(tool).into(),
+            args: substitute(tool.launch_args, path),
+            cwd: Some(path.into()),
         }
     }
 }
 
 #[cfg(target_os = "macos")]
-fn build_invocation(tool: &ToolDef, path: &str) -> Invocation {
-    match tool.launch_kind {
-        LaunchKind::Spawn => {
-            if let Some(app) = tool.mac_app {
-                // `open -a "<App>" <path>` reliably opens GUI apps and terminals
-                // at the folder without needing a CLI on PATH.
-                Invocation {
-                    program: "open".into(),
-                    args: vec!["-a".into(), app.into(), path.into()],
-                    cwd: None,
-                }
-            } else {
-                Invocation {
-                    program: first_command(tool).into(),
-                    args: substitute(tool.launch_args, path),
-                    cwd: Some(path.into()),
-                }
-            }
-        }
-        LaunchKind::InTerminal => {
-            // Drive Terminal.app via AppleScript: cd to the repo, run the CLI.
-            let shell = format!("cd {} && {}", shell_quote(path), first_command(tool));
-            let script = format!(
-                "tell application \"Terminal\" to do script \"{}\"",
-                applescript_escape(&shell)
-            );
-            Invocation {
-                program: "osascript".into(),
-                args: vec!["-e".into(), script],
-                cwd: None,
-            }
-        }
+fn default_terminal(path: &str) -> Invocation {
+    Invocation {
+        program: "open".into(),
+        args: vec!["-a".into(), "Terminal".into(), path.into()],
+        cwd: None,
     }
 }
 
 #[cfg(all(unix, not(target_os = "macos")))]
-fn build_invocation(tool: &ToolDef, path: &str) -> Invocation {
-    match tool.launch_kind {
-        LaunchKind::Spawn => Invocation {
-            program: first_command(tool).into(),
-            args: substitute(tool.launch_args, path),
-            cwd: Some(path.into()),
-        },
-        LaunchKind::InTerminal => {
-            // Open the desktop's default terminal at the repo running the CLI.
-            let inner = format!("{}; exec \"$SHELL\"", first_command(tool));
-            Invocation {
-                program: "x-terminal-emulator".into(),
-                args: vec!["-e".into(), "sh".into(), "-c".into(), inner],
-                cwd: Some(path.into()),
-            }
-        }
+fn build_spawn(tool: &ToolDef, path: &str) -> Invocation {
+    Invocation {
+        program: first_command(tool).into(),
+        args: substitute(tool.launch_args, path),
+        cwd: Some(path.into()),
     }
 }
 
-/// Single-quote a string for a POSIX shell (used only on macOS launch).
-#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
-fn shell_quote(s: &str) -> String {
-    format!("'{}'", s.replace('\'', "'\\''"))
-}
-
-/// Escape a string for an AppleScript string literal (used only on macOS).
-#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
-fn applescript_escape(s: &str) -> String {
-    s.replace('\\', "\\\\").replace('"', "\\\"")
+#[cfg(all(unix, not(target_os = "macos")))]
+fn default_terminal(path: &str) -> Invocation {
+    // freedesktop default terminal; opens in the child's cwd.
+    Invocation {
+        program: "x-terminal-emulator".into(),
+        args: vec![],
+        cwd: Some(path.into()),
+    }
 }
 
 #[cfg(test)]
@@ -984,40 +976,36 @@ mod tests {
         assert!(TOOLS.iter().filter(|t| t.category == "terminal").count() >= 5);
     }
 
+    fn path_present(inv: &Invocation) -> bool {
+        inv.args.iter().any(|a| a.contains("/tmp/repo")) || inv.cwd.as_deref() == Some("/tmp/repo")
+    }
+
     #[test]
     fn resolve_launch_references_the_repo_path() {
         for id in ["vscode", "claude-code", "wezterm"] {
-            if TOOLS
-                .iter()
-                .find(|t| t.id == id)
-                .unwrap()
-                .platforms
-                .contains(&CURRENT_OS)
-            {
-                let inv = resolve_launch(id, "/tmp/repo").unwrap();
-                let in_args = inv.args.iter().any(|a| a.contains("/tmp/repo"));
-                let in_cwd = inv.cwd.as_deref() == Some("/tmp/repo");
-                assert!(in_args || in_cwd, "path missing for {id}: {inv:?}");
-            }
+            let inv = resolve_launch(id, "/tmp/repo", None).unwrap();
+            assert!(path_present(&inv), "path missing for {id}: {inv:?}");
         }
+    }
+
+    #[test]
+    fn ai_tool_uses_chosen_terminal_at_the_repo() {
+        // Picking a terminal routes the AI launch through that terminal.
+        let inv = resolve_launch("claude-code", "/tmp/repo", Some("wezterm")).unwrap();
+        assert!(
+            path_present(&inv),
+            "chosen terminal did not target the repo: {inv:?}"
+        );
+        // Unknown terminal id falls back to the OS default terminal (no error).
+        let inv = resolve_launch("claude-code", "/tmp/repo", Some("does-not-exist")).unwrap();
+        assert!(path_present(&inv));
     }
 
     #[test]
     fn resolve_launch_rejects_unknown_tool() {
         assert!(matches!(
-            resolve_launch("nope", "/x"),
+            resolve_launch("nope", "/x", None),
             Err(AppError::ToolNotFound(_))
         ));
-    }
-
-    #[test]
-    fn shell_quote_escapes_single_quotes() {
-        assert_eq!(shell_quote("/a/b"), "'/a/b'");
-        assert_eq!(shell_quote("it's"), "'it'\\''s'");
-    }
-
-    #[test]
-    fn applescript_escape_escapes_specials() {
-        assert_eq!(applescript_escape("a\"b\\c"), "a\\\"b\\\\c");
     }
 }

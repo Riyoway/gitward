@@ -8,6 +8,8 @@ interface SettingsState {
   theme: Theme;
   language: Language;
   autoSwitch: boolean;
+  /** Preferred terminal tool id for opening AI CLIs; '' = OS default. */
+  terminalId: string;
   hydrated: boolean;
 
   /** Load persisted settings and apply side effects (theme, language). */
@@ -15,12 +17,14 @@ interface SettingsState {
   setTheme: (theme: Theme) => void;
   setLanguage: (language: Language) => void;
   setAutoSwitch: (autoSwitch: boolean) => void;
+  setTerminalId: (terminalId: string) => void;
 }
 
 const DEFAULTS = {
   theme: 'system' as Theme,
   language: 'ja' as Language,
   autoSwitch: true,
+  terminalId: '',
 };
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
@@ -29,12 +33,13 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
   hydrate: async () => {
     try {
-      const [theme, language, autoSwitch] = await Promise.all([
+      const [theme, language, autoSwitch, terminalId] = await Promise.all([
         appStore.get<Theme>(StoreKey.Theme, DEFAULTS.theme),
         appStore.get<Language>(StoreKey.Language, DEFAULTS.language),
         appStore.get<boolean>(StoreKey.AutoSwitch, DEFAULTS.autoSwitch),
+        appStore.get<string>(StoreKey.TerminalId, DEFAULTS.terminalId),
       ]);
-      set({ theme, language, autoSwitch, hydrated: true });
+      set({ theme, language, autoSwitch, terminalId, hydrated: true });
       applyTheme(theme);
       await i18n.changeLanguage(language);
     } catch {
@@ -59,6 +64,11 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   setAutoSwitch: (autoSwitch) => {
     set({ autoSwitch });
     void appStore.set(StoreKey.AutoSwitch, autoSwitch);
+  },
+
+  setTerminalId: (terminalId) => {
+    set({ terminalId });
+    void appStore.set(StoreKey.TerminalId, terminalId);
   },
 }));
 
