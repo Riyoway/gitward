@@ -80,7 +80,12 @@
     "favoritesOnly": "Favorites",
     "noMatches": "No repositories match your filters.",
     "syncDone": "Synced {{name}}",
-    "syncFailed": "Sync failed"
+    "syncFailed": "Sync failed",
+    "icon": "Icon",
+    "setIcon": "Set icon…",
+    "changeIcon": "Change icon…",
+    "removeIcon": "Remove icon",
+    "iconFailed": "Could not set icon"
   },
   "logs": {
     "empty": "No activity yet. Sync a repository or switch accounts to see logs here.",

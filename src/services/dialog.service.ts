@@ -20,3 +20,13 @@ export async function pickJsonFile(title?: string): Promise<string | null> {
 export function pickSavePath(defaultName: string): Promise<string | null> {
   return save({ defaultPath: defaultName, filters: [{ name: 'JSON', extensions: ['json'] }] });
 }
+
+/** Prompt the user to pick an image file, starting at `defaultPath`. */
+export async function pickImageFile(defaultPath?: string): Promise<string | null> {
+  const selected = await open({
+    multiple: false,
+    defaultPath,
+    filters: [{ name: 'Image', extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'ico', 'bmp'] }],
+  });
+  return typeof selected === 'string' ? selected : null;
+}

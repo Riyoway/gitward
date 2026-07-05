@@ -22,6 +22,7 @@ import {
   Fingerprint,
   FolderOpen,
   GitBranch,
+  ImagePlus,
   Package,
   RefreshCw,
   Star,
@@ -33,6 +34,8 @@ import { useTranslation } from 'react-i18next';
 import { queryKeys } from '@/lib/queryKeys';
 import { firstSelectedKey } from '@/lib/selection';
 import { toastError, toastSuccess } from '@/lib/toast';
+import { pickImageFile } from '@/services/dialog.service';
+import { fsService } from '@/services/fs.service';
 import { gitService } from '@/services/git.service';
 import { githubCliService } from '@/services/githubCli.service';
 import { identityService } from '@/services/identity.service';
@@ -155,6 +158,16 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
   const installedTools = (tools.data ?? []).filter((tool) => tool.installed);
   const TOOL_CATEGORIES = ['editor', 'terminal', 'ai'] as const;
 
+  const chooseIcon = async () => {
+    try {
+      const file = await pickImageFile(repo.path);
+      if (!file) return;
+      update(repo.id, { icon: await fsService.readImageDataUrl(file) });
+    } catch (e) {
+      toastError(t('repository.iconFailed'), e instanceof Error ? e.message : String(e));
+    }
+  };
+
   const handleOpen = async (key: string) => {
     setOpenError(null);
     try {
@@ -182,11 +195,50 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
       <Card shadow="sm" className="w-full">
         <CardBody className="gap-3 p-5">
         <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h3 className="truncate font-medium">{repo.name}</h3>
-            <p className="truncate font-mono text-xs text-default-400" title={repo.path}>
-              {repo.path}
-            </p>
+          <div className="flex min-w-0 items-start gap-3">
+            <Dropdown>
+              <DropdownTrigger>
+                <button
+                  type="button"
+                  aria-label={t('repository.icon')}
+                  className="mt-0.5 shrink-0 overflow-hidden rounded-medium transition-opacity hover:opacity-80"
+                >
+                  {repo.icon ? (
+                    <img src={repo.icon} alt="" className="h-9 w-9 rounded-medium object-cover" />
+                  ) : (
+                    <span className="flex h-9 w-9 items-center justify-center rounded-medium bg-default-100 text-default-400">
+                      <ImagePlus size={16} />
+                    </span>
+                  )}
+                </button>
+              </DropdownTrigger>
+              <DropdownMenu
+                aria-label={t('repository.icon')}
+                onAction={(key) => {
+                  if (key === 'set') void chooseIcon();
+                  else if (key === 'remove') update(repo.id, { icon: undefined });
+                }}
+              >
+                {[
+                  <DropdownItem key="set">
+                    {repo.icon ? t('repository.changeIcon') : t('repository.setIcon')}
+                  </DropdownItem>,
+                  ...(repo.icon
+                    ? [
+                        <DropdownItem key="remove" className="text-danger" color="danger">
+                          {t('repository.removeIcon')}
+                        </DropdownItem>,
+                      ]
+                    : []),
+                ]}
+              </DropdownMenu>
+            </Dropdown>
+            <div className="min-w-0">
+              <h3 className="truncate font-medium">{repo.name}</h3>
+              <p className="truncate font-mono text-xs text-default-400" title={repo.path}>
+                {repo.path}
+              </p>
+            </div>
           </div>
           <div className="flex shrink-0 items-center gap-1">
             <Tooltip content={t('appIdentity.title')} closeDelay={0}>

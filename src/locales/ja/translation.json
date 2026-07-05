@@ -80,7 +80,12 @@
     "favoritesOnly": "お気に入りのみ",
     "noMatches": "条件に一致するリポジトリがありません。",
     "syncDone": "{{name}} を同期しました",
-    "syncFailed": "同期に失敗しました"
+    "syncFailed": "同期に失敗しました",
+    "icon": "アイコン",
+    "setIcon": "アイコンを設定…",
+    "changeIcon": "アイコンを変更…",
+    "removeIcon": "アイコンを削除",
+    "iconFailed": "アイコンを設定できませんでした"
   },
   "logs": {
     "empty": "まだ操作履歴がありません。リポジトリを Sync したりアカウントを切り替えると、ここに記録されます。",

@@ -15,4 +15,6 @@ export interface Repository {
   favorite?: boolean;
   /** ISO timestamp of the last time a tool was launched here. */
   lastOpenedAt?: string;
+  /** Custom icon as a data URL. */
+  icon?: string;
 }

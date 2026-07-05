@@ -27,6 +27,8 @@ serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 # Format-preserving edits to Cargo.toml.
 toml_edit = "0.25"
+# Encode user-picked project icons as data URLs.
+base64 = "0.22"
 thiserror = "2"
 
 [dev-dependencies]
