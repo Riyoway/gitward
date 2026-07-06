@@ -108,6 +108,12 @@ fn read_key(runner: &dyn CommandRunner, path: &str, key: &str) -> AppResult<Opti
     }
 }
 
+/// The `origin` remote URL, if one is set. Used by Push Guard to capture the
+/// expected remote at install time.
+pub fn origin_url(runner: &dyn CommandRunner, path: &str) -> Option<String> {
+    read_remote_url(runner, path)
+}
+
 fn read_remote_url(runner: &dyn CommandRunner, path: &str) -> Option<String> {
     let out = runner
         .run("git", &["-C", path, "remote", "get-url", "origin"], None)

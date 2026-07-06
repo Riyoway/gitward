@@ -21,6 +21,9 @@ your editor or terminal in the right place.
 
 - **No more wrong-author commits.** The account a repo belongs to is explicit and
   enforced, not remembered.
+- **Push Guard stops the mistake at the door.** An optional per-repo `pre-push`
+  hook blocks a push when the current git/`gh` identity doesn't match the account
+  the repo belongs to — even from a terminal or an AI agent, with Gitward closed.
 - **One action, whole identity.** `git config`, `gh auth switch`,
   `gh auth setup-git`, and credential cleanup run as one step with a full log.
 - **Auth mismatches, surfaced.** Gitward cross-checks the active `gh` account

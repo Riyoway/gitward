@@ -86,6 +86,21 @@
     "setIcon": "アイコンを設定",
     "iconFailed": "アイコンを設定できませんでした"
   },
+  "guard": {
+    "title": "Push Guard",
+    "on": "ガード中",
+    "external": "外部フック",
+    "onHint": "Push Guard が有効です。このリポジトリのアカウントと一致しない Push はブロックされます。",
+    "offHint": "Push Guard を有効にすると、誤ったアイデンティティでの Push をブロックします。",
+    "needAccount": "先に git アカウントを割り当ててください。",
+    "externalHint": "Gitward 以外が作成した pre-push フックがすでに存在します。",
+    "enabled": "{{name}} の Push Guard を有効にしました",
+    "disabled": "{{name}} の Push Guard を無効にしました",
+    "failed": "Push Guard を更新できませんでした",
+    "disableTitle": "Push Guard を無効にしますか？",
+    "disableBody": "このリポジトリからの Push は、割り当てられたアイデンティティと照合されなくなります。誤ったアカウントで Push する恐れがあります。",
+    "disableConfirm": "無効にする"
+  },
   "logs": {
     "empty": "まだ操作履歴がありません。リポジトリを Sync したりアカウントを切り替えると、ここに記録されます。",
     "clear": "クリア",

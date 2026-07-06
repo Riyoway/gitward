@@ -86,6 +86,21 @@
     "setIcon": "Set icon",
     "iconFailed": "Could not set icon"
   },
+  "guard": {
+    "title": "Push Guard",
+    "on": "Guarded",
+    "external": "External hook",
+    "onHint": "Push Guard is on. Pushes are blocked unless the identity matches this repo's account.",
+    "offHint": "Turn on Push Guard to block pushes with the wrong identity.",
+    "needAccount": "Assign a git account first.",
+    "externalHint": "A pre-push hook already exists that Gitward didn't create.",
+    "enabled": "Push Guard enabled for {{name}}",
+    "disabled": "Push Guard disabled for {{name}}",
+    "failed": "Push Guard could not be updated",
+    "disableTitle": "Disable Push Guard?",
+    "disableBody": "Pushes from this repository will no longer be checked against its assigned identity. You could push with the wrong account.",
+    "disableConfirm": "Disable"
+  },
   "logs": {
     "empty": "No activity yet. Sync a repository or switch accounts to see logs here.",
     "clear": "Clear",

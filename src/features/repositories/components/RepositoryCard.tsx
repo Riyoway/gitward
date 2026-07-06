@@ -10,6 +10,11 @@ import {
   DropdownMenu,
   DropdownSection,
   DropdownTrigger,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   Select,
   SelectItem,
   Spinner,
@@ -25,6 +30,9 @@ import {
   ImagePlus,
   Package,
   RefreshCw,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
   Star,
   Trash2,
   User,
@@ -38,6 +46,7 @@ import { pickImageFile } from '@/services/dialog.service';
 import { fsService } from '@/services/fs.service';
 import { gitService } from '@/services/git.service';
 import { githubCliService } from '@/services/githubCli.service';
+import { guardService } from '@/services/guard.service';
 import { identityService } from '@/services/identity.service';
 import { launcherService } from '@/services/launcher.service';
 import { syncService } from '@/services/sync.service';
@@ -108,15 +117,50 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
 
   const [openError, setOpenError] = useState<string | null>(null);
   const identityModal = useDisclosure();
+  const guardConfirm = useDisclosure();
+  const [guardBusy, setGuardBusy] = useState(false);
+
+  const guard = useQuery({
+    queryKey: queryKeys.guard(repo.id),
+    queryFn: () => guardService.status(repo.path),
+  });
+  const invalidateGuard = () =>
+    void queryClient.invalidateQueries({ queryKey: queryKeys.guard(repo.id) });
 
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: queryKeys.repoStatus(repo.id) });
     void queryClient.invalidateQueries({ queryKey: queryKeys.repoIdentity(repo.id) });
     void queryClient.invalidateQueries({ queryKey: queryKeys.appIdentity(repo.path) });
+    invalidateGuard();
   };
   const refreshing = status.isFetching || identity.isFetching || appIdentity.isFetching;
 
   const assignedAccount = accounts.find((a) => a.id === repo.gitAccountId);
+
+  /** Install/refresh (enabled) or remove (disabled) the pre-push guard hook. */
+  async function setGuard(enabled: boolean) {
+    if (enabled && !assignedAccount) return;
+    setGuardBusy(true);
+    try {
+      if (enabled) {
+        await guardService.install(
+          repo.path,
+          assignedAccount!.userName,
+          assignedAccount!.email,
+          repo.ghUsername,
+        );
+        toastSuccess(t('guard.enabled', { name: repo.name }));
+      } else {
+        await guardService.uninstall(repo.path);
+        toastSuccess(t('guard.disabled', { name: repo.name }));
+      }
+    } catch (e) {
+      toastError(t('guard.failed'), e instanceof Error ? e.message : String(e));
+    } finally {
+      setGuardBusy(false);
+      invalidateGuard();
+    }
+  }
 
   const sync = useMutation({
     mutationFn: () => {
@@ -132,6 +176,13 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
       void queryClient.invalidateQueries({ queryKey: queryKeys.repoIdentity(repo.id) });
       void queryClient.invalidateQueries({ queryKey: queryKeys.repoStatus(repo.id) });
       void queryClient.invalidateQueries({ queryKey: queryKeys.ghAccounts });
+      // Keep the guard's baked identity in step with what we just applied.
+      if (guard.data === 'gitward' && assignedAccount) {
+        void guardService
+          .install(repo.path, assignedAccount.userName, assignedAccount.email, repo.ghUsername)
+          .catch(() => {})
+          .finally(invalidateGuard);
+      }
       recordLog({
         action: 'sync',
         target: repo.name,
@@ -157,6 +208,16 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
   const canOpenRemote = !!remoteUrl && /^https?:\/\//.test(remoteUrl);
   const installedTools = (tools.data ?? []).filter((tool) => tool.installed);
   const TOOL_CATEGORIES = ['editor', 'terminal', 'ai'] as const;
+
+  const guardOn = guard.data === 'gitward';
+  const guardForeign = guard.data === 'foreign';
+  const guardTooltip = guardForeign
+    ? t('guard.externalHint')
+    : guardOn
+      ? t('guard.onHint')
+      : assignedAccount
+        ? t('guard.offHint')
+        : t('guard.needAccount');
 
   const chooseIcon = async () => {
     try {
@@ -192,6 +253,32 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
         isOpen={identityModal.isOpen}
         onOpenChange={identityModal.onOpenChange}
       />
+      <Modal isOpen={guardConfirm.isOpen} onOpenChange={guardConfirm.onOpenChange} size="sm">
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>{t('guard.disableTitle')}</ModalHeader>
+              <ModalBody>
+                <p className="text-sm text-default-600">{t('guard.disableBody')}</p>
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="light" onPress={onClose}>
+                  {t('common.cancel')}
+                </Button>
+                <Button
+                  color="warning"
+                  onPress={() => {
+                    onClose();
+                    void setGuard(false);
+                  }}
+                >
+                  {t('guard.disableConfirm')}
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
       <Card shadow="sm" className="w-full">
         <CardBody className="gap-3 p-5">
         <div className="flex items-start justify-between gap-3">
@@ -220,6 +307,29 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-1">
+            <Tooltip content={guardTooltip} closeDelay={0}>
+              <Button
+                isIconOnly
+                size="sm"
+                variant="light"
+                color={guardOn ? 'success' : guardForeign ? 'warning' : 'default'}
+                isDisabled={guardForeign || (!guardOn && !assignedAccount)}
+                isLoading={guardBusy}
+                aria-label={t('guard.title')}
+                onPress={() => {
+                  if (guardOn) guardConfirm.onOpen();
+                  else void setGuard(true);
+                }}
+              >
+                {guardOn ? (
+                  <ShieldCheck size={15} />
+                ) : guardForeign ? (
+                  <ShieldAlert size={15} />
+                ) : (
+                  <Shield size={15} />
+                )}
+              </Button>
+            </Tooltip>
             <Tooltip content={t('appIdentity.title')} closeDelay={0}>
               <Button
                 isIconOnly
@@ -308,6 +418,26 @@ export function RepositoryCard({ repo, onRemove }: RepositoryCardProps) {
                 </Chip>
               )}
             </>
+          )}
+          {guardOn && (
+            <Chip
+              size="sm"
+              color="success"
+              variant="flat"
+              startContent={<ShieldCheck size={12} />}
+            >
+              {t('guard.on')}
+            </Chip>
+          )}
+          {guardForeign && (
+            <Chip
+              size="sm"
+              color="warning"
+              variant="flat"
+              startContent={<ShieldAlert size={12} />}
+            >
+              {t('guard.external')}
+            </Chip>
           )}
         </div>
 

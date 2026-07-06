@@ -32,6 +32,10 @@ pub enum AppError {
     #[error("unknown identity field: {0}")]
     UnknownField(String),
 
+    /// Push Guard could not be installed or removed (e.g. a foreign hook exists).
+    #[error("{0}")]
+    Guard(String),
+
     /// Failed to spawn a process at all (e.g. the program is not on PATH).
     #[error("failed to run `{program}`: {source}")]
     Spawn {
